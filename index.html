@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planeador Maceió - Crie o seu Roteiro</title>
     
-    <!-- PWA & WebApp Tags (Permite instalar a app no telemóvel) -->
+    <!-- PWA & WebApp Tags -->
     <meta name="theme-color" content="#00b4d8">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,8 +13,8 @@
     <meta name="apple-mobile-web-app-title" content="Roteiro Maceió">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
     
-    <!-- Manifesto Embutido (Data URI) -->
-    <link rel="manifest" href="./manifest.json">
+    <!-- Link para o Manifesto (será injetado via JS para garantir compatibilidade máxima) -->
+    <link rel="manifest" id="dynamic-manifest">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
@@ -166,7 +166,7 @@
 </head>
 <body class="text-slate-800 antialiased selection:bg-ocean selection:text-white">
 
-    <!-- Secção Hero Limpa (Apenas Imagem e Texto) -->
+    <!-- Secção Hero Limpa -->
     <header class="hero-bg h-[50vh] md:h-[60vh] flex items-center justify-center relative overflow-hidden">
         <div class="text-center text-white px-4 z-10 w-full max-w-4xl">
             <div class="inline-block mb-4 px-5 py-2 rounded-full border border-white/30 backdrop-blur-md bg-white/10 shadow-lg">
@@ -190,7 +190,7 @@
     <!-- Conteúdo Principal -->
     <main id="planeador" class="container mx-auto px-4 py-8 md:py-16 max-w-6xl relative z-30">
         
-        <!-- Navegação de Abas (Responsiva com Wrap e Fluxo Natural - Removido Sticky) -->
+        <!-- Navegação de Abas -->
         <div class="relative bg-white/60 backdrop-blur-md border-b border-slate-200 py-3 px-4 -mx-4 md:px-8 md:-mx-8 mb-8 md:mb-12 flex flex-wrap justify-center gap-2 md:gap-3 items-center transition-all">
             <button onclick="switchTab('catalogo')" id="btn-catalogo" class="tab-btn tab-active glass-tab px-4 py-2 md:px-6 md:py-3 rounded-full text-slate-700 font-medium text-sm md:text-base transition-all duration-300 flex items-center gap-2 shadow-sm">
                 <i class="fas fa-map-marked-alt text-ocean text-base md:text-lg"></i> <span class="hidden sm:inline">Pontos Turísticos</span><span class="sm:hidden">Catálogo</span>
@@ -235,7 +235,7 @@
                 </div>
             </div>
 
-            <!-- Abas dos Dias (Linha do Tempo) -->
+            <!-- Abas dos Dias -->
             <div id="dia1" class="day-content hidden relative timeline-container pb-8 md:pb-12">
                 <div class="text-center mb-10 md:mb-16"><h2 class="text-3xl md:text-4xl font-serif font-bold text-slate-800">Roteiro: Dia 1</h2><div class="w-16 md:w-20 h-1 bg-gradient-to-r from-ocean-light to-ocean mx-auto mt-3 md:mt-4 rounded-full"></div></div>
                 <div id="timeline-dia1"></div>
@@ -269,25 +269,32 @@
         <span id="toast-message">Adicionado com sucesso!</span>
     </div>
 
-    <!-- Banner de Instalação PWA -->
-    <div id="pwa-install-banner" class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-white rounded-2xl shadow-2xl transform translate-y-40 opacity-0 transition-all duration-500 z-[500] flex flex-col overflow-hidden border border-slate-100 hidden">
+    <!-- Banner de Instalação PWA Robusto -->
+    <div id="pwa-install-banner" class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-[350px] bg-white rounded-2xl shadow-2xl transform translate-y-40 opacity-0 transition-all duration-500 z-[500] flex flex-col overflow-hidden border border-slate-100 hidden">
         <div class="bg-gradient-to-r from-ocean to-ocean-dark p-4 flex justify-between items-center text-white">
             <div class="flex items-center gap-3">
-                <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm"><i class="fas fa-plane-departure text-xl"></i></div>
+                <div class="bg-white/20 w-10 h-10 flex items-center justify-center rounded-xl backdrop-blur-sm"><i class="fas fa-plane-departure text-xl"></i></div>
                 <div>
-                    <h4 class="font-bold text-sm">Instalar Planeador Maceió</h4>
-                    <p class="text-[10px] text-white/80">Acesso rápido e roteiro offline no seu ecrã</p>
+                    <h4 class="font-bold text-sm">Instalar Planeador</h4>
+                    <p class="text-[10px] text-white/80">Acesso rápido no seu ecrã inicial</p>
                 </div>
             </div>
         </div>
         <div class="p-4 bg-white flex justify-end gap-3">
             <button onclick="dismissInstallBanner()" class="text-slate-500 hover:text-slate-700 font-medium px-3 py-1.5 text-xs transition-colors rounded-lg">Mais Tarde</button>
-            <button id="pwa-install-btn" class="bg-ocean hover:bg-ocean-dark text-white font-bold px-5 py-1.5 rounded-lg text-xs shadow-md transition-colors flex items-center gap-2">
+            <button id="pwa-install-btn" class="bg-ocean hover:bg-ocean-dark text-white font-bold px-5 py-2 rounded-xl text-xs shadow-md transition-colors flex items-center gap-2">
                 <i class="fas fa-download"></i> Instalar App
             </button>
         </div>
-        <div id="ios-instructions" class="hidden p-4 bg-slate-50 text-xs text-slate-600 border-t border-slate-100 leading-relaxed">
-            <p>Para instalar no iPhone/iPad: <br>Toque no ícone <i class="fas fa-share-square text-ocean mx-1"></i> <strong>Partilhar</strong> e depois selecione <strong>"Ecrã Principal"</strong>.</p>
+        
+        <!-- Instruções Manuais para iOS -->
+        <div id="ios-instructions" class="hidden p-4 bg-slate-50 text-xs text-slate-600 border-t border-slate-100 leading-relaxed text-center">
+            <p>Para instalar no iPhone/iPad: <br>Toque no ícone <i class="fas fa-share-square text-ocean mx-1 text-base"></i> <strong>Partilhar</strong> na barra do navegador e selecione <br><strong>"Adicionar ao Ecrã Principal"</strong>.</p>
+        </div>
+        
+        <!-- Instruções Manuais para Android -->
+        <div id="android-instructions" class="hidden p-4 bg-slate-50 text-xs text-slate-600 border-t border-slate-100 leading-relaxed text-center">
+            <p>Para instalar no Android: <br>Toque no menu <i class="fas fa-ellipsis-v text-ocean mx-1 text-base"></i> (três pontos) no canto superior direito e selecione <br><strong>"Adicionar ao Ecrã Principal"</strong> ou <strong>"Instalar Aplicação"</strong>.</p>
         </div>
     </div>
 
@@ -316,79 +323,89 @@
 
     <!-- LÓGICA DA APLICAÇÃO -->
     <script>
-        // PWA - Lógica de Instalação (Service Worker Invisível e Prompt)
+        // ==========================================
+        // SISTEMA PWA & INSTALAÇÃO ROBUSTA
+        // ==========================================
+        
+        // 1. Injetar Manifesto Dinamicamente (Garante o URL correto de onde a app está aberta)
+        const manifestData = {
+            name: "Planeador Maceió",
+            short_name: "Roteiro Maceió",
+            description: "Crie o seu roteiro perfeito para Maceió.",
+            start_url: window.location.href.split('?')[0], // Limpa parâmetros da URL
+            display: "standalone",
+            background_color: "#f8fafc",
+            theme_color: "#00b4d8",
+            icons: [
+                { src: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png", sizes: "192x192", type: "image/png" },
+                { src: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png", sizes: "512x512", type: "image/png" }
+            ]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/manifest+json' });
+        document.getElementById('dynamic-manifest').href = URL.createObjectURL(manifestBlob);
+
+        // 2. Lógica da Janela de Instalação (Híbrida: Nativa ou Manual)
         let deferredPrompt;
         const pwaBanner = document.getElementById('pwa-install-banner');
         const pwaInstallBtn = document.getElementById('pwa-install-btn');
         const iosInstructions = document.getElementById('ios-instructions');
-
-        // Cria um Service Worker em tempo real (Necessário para o Android permitir a instalação)
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                const swContent = `
-                    self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
-                    self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-                    self.addEventListener('fetch', e => {}); 
-                `;
-                const blob = new Blob([swContent], { type: 'application/javascript' });
-                navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
-            });
-        }
+        const androidInstructions = document.getElementById('android-instructions');
 
         function showInstallBanner() {
             pwaBanner.classList.remove('hidden');
-            setTimeout(() => {
-                pwaBanner.classList.remove('translate-y-40', 'opacity-0');
-            }, 100);
+            setTimeout(() => { pwaBanner.classList.remove('translate-y-40', 'opacity-0'); }, 100);
         }
 
         function dismissInstallBanner() {
             pwaBanner.classList.add('translate-y-40', 'opacity-0');
-            setTimeout(() => {
-                pwaBanner.classList.add('hidden');
-            }, 500);
+            setTimeout(() => { pwaBanner.classList.add('hidden'); }, 500);
             localStorage.setItem('pwaMaceioDismissed', 'true');
         }
 
-        // Interceta o evento de instalação padrão do Chrome/Android
+        // Interceta o evento de instalação padrão (Se o Android permitir nativamente)
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            
-            if (!localStorage.getItem('pwaMaceioDismissed')) {
-                showInstallBanner();
-            }
+            if (!localStorage.getItem('pwaMaceioDismissed')) showInstallBanner();
         });
 
-        // Clique no botão de instalar do nosso banner
+        // Evento do Botão de Instalação
         pwaInstallBtn.addEventListener('click', async () => {
             if (deferredPrompt) {
-                // Android/Chrome: Mostra o aviso nativo
+                // Instalação Nativa e Automática (Android)
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 if (outcome === 'accepted') dismissInstallBanner();
                 deferredPrompt = null;
             } else {
-                // Se o utilizador clicar e não houver prompt nativo (ex: iOS), mostramos as instruções
-                pwaInstallBtn.classList.add('hidden');
-                iosInstructions.classList.remove('hidden');
+                // Instalação Manual Guiada (Para navegadores estritos ou iOS)
+                pwaInstallBtn.classList.add('hidden'); // Esconde o botão e mostra guia
+                const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+                
+                if (isIos) {
+                    iosInstructions.classList.remove('hidden');
+                } else {
+                    androidInstructions.classList.remove('hidden');
+                }
             }
         });
 
-        // Deteta se é iPhone/iOS e mostra as instruções por padrão (pois a Apple bloqueia o aviso automático)
+        // Deteta abertura da página para forçar a verificação da janela
         window.addEventListener('load', () => {
             setTimeout(() => {
-                const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-                const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
+                const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
                 
-                if (isIos && !isInStandaloneMode && !localStorage.getItem('pwaMaceioDismissed')) {
+                // Se a app NÃO estiver instalada e o utilizador NÃO a tiver dispensado, mostra a janela
+                if (!isStandalone && !localStorage.getItem('pwaMaceioDismissed')) {
                     showInstallBanner();
                 }
-            }, 3000); // Mostra o banner após 3 segundos
+            }, 3000); // Aguarda 3 segundos para não interromper a leitura inicial
         });
 
-        // =========================================================================
-        // Base de Dados Atualizada com foco na gastronomia e +10 Pontos Turísticos
+        // ==========================================
+        // BASE DE DADOS & LÓGICA DO ROTEIRO
+        // ==========================================
+        
         const spotsJSON = `[
             { "id": "ponta-verde", "title": "Orla de Ponta Verde", "img": "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&q=80&w=800", "desc": "Caminhada pelo calçadão mais bonito do Brasil. Tire uma foto no letreiro 'Eu Amo Maceió'.", "time": "Manhã", "icon": "fa-sun", "color": "from-amber-300 to-orange-400", "lat": -9.6644, "lng": -35.7051 },
             { "id": "piscinas-paju", "title": "Piscinas Naturais de Pajuçara", "img": "https://images.unsplash.com/photo-1582650517598-a616226db2ba?auto=format&fit=crop&q=80&w=800", "desc": "Embarque numa jangada rústica até às famosas piscinas naturais para nadar com os peixinhos.", "time": "Manhã/Tarde", "icon": "fa-water", "color": "from-ocean-light to-ocean", "lat": -9.6740, "lng": -35.7144 },
@@ -421,15 +438,11 @@
             { "id": "santuario-tereza", "title": "Santuário Santa Tereza", "img": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=800", "desc": "Piscina natural de águas cristalinas rodeada de uma deslumbrante e silenciosa mata preservada.", "time": "Dia Inteiro", "icon": "fa-dove", "color": "from-teal-500 to-teal-700", "lat": -9.3100, "lng": -35.4100 }
         ]`;
 
-        // Analisar (Parse) do JSON para convertê-lo em Objeto JavaScript
         const allSpots = JSON.parse(spotsJSON);
-
-        // Estado da Aplicação
         let availableSpots = [];
         let itinerary = { dia1: [], dia2: [], dia3: [], dia4: [] };
         let toastTimeout;
 
-        // Funções de Cache (LocalStorage)
         function loadData() {
             const savedData = localStorage.getItem('maceioRoteiroData');
             if (savedData) {
@@ -449,14 +462,12 @@
             localStorage.setItem('maceioRoteiroData', JSON.stringify({ availableSpots, itinerary }));
         }
 
-        // Inicialização
         document.addEventListener('DOMContentLoaded', () => {
-            loadData(); // Carregar do cache
+            loadData();
             renderCatalog();
             renderAllDays();
         });
 
-        // Alternar Abas
         function switchTab(tabId) {
             document.querySelectorAll('.day-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('tab-active'));
@@ -470,7 +481,6 @@
             targetContent.classList.add('fade-in');
         }
 
-        // Mostrar Notificação (Toast)
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             const msgEl = document.getElementById('toast-message');
@@ -492,7 +502,6 @@
             }, 3000);
         }
 
-        // Renderizar Catálogo
         function renderCatalog() {
             const grid = document.getElementById('catalog-grid');
             grid.innerHTML = '';
@@ -547,7 +556,6 @@
             });
         }
 
-        // Renderizar Roteiro Específico
         function renderDay(dayId) {
             const container = document.getElementById('timeline-' + dayId);
             const items = itinerary[dayId];
@@ -617,14 +625,12 @@
             renderDay('dia4');
         }
 
-        // Ações: Adicionar e Remover
         function addToDay(spotId, dayId) {
             const spotIndex = availableSpots.findIndex(s => s.id === spotId);
             if (spotIndex > -1) {
                 const spot = availableSpots.splice(spotIndex, 1)[0];
                 itinerary[dayId].push(spot);
                 
-                // Reordenar cronologicamente sempre que o utilizador adiciona algo
                 const getWeight = (time) => {
                     const t = time.toLowerCase();
                     if (t.includes('manhã')) return 1;
@@ -638,8 +644,7 @@
                 };
                 itinerary[dayId].sort((a, b) => getWeight(a.time) - getWeight(b.time));
                 
-                saveData(); // Atualizar o cache
-                
+                saveData();
                 renderCatalog();
                 renderAllDays();
                 
@@ -653,7 +658,6 @@
             if (spotIndex > -1) {
                 const spot = itinerary[dayId].splice(spotIndex, 1)[0];
                 
-                // Só devolve ao catálogo se não existir noutro dia do roteiro (para os casos de restaurantes repetidos)
                 let stillInItinerary = false;
                 ['dia1', 'dia2', 'dia3', 'dia4'].forEach(day => {
                     if (itinerary[day].some(s => s.id === spot.id)) {
@@ -665,15 +669,13 @@
                     availableSpots.push(spot);
                 }
                 
-                saveData(); // Atualizar o cache
-                
+                saveData();
                 renderCatalog();
                 renderAllDays();
                 showToast('Removido do roteiro.', 'error');
             }
         }
 
-        // Limpar Todo o Roteiro
         function clearItinerary() {
             if (availableSpots.length === allSpots.length) return;
             
@@ -681,8 +683,7 @@
                 availableSpots = [...allSpots];
                 itinerary = { dia1: [], dia2: [], dia3: [], dia4: [] };
                 
-                saveData(); // Atualizar o cache
-                
+                saveData();
                 renderCatalog();
                 renderAllDays();
                 showToast('O roteiro foi limpo.', 'error');
@@ -690,7 +691,6 @@
             }
         }
 
-        // Sorteio Aleatório Inteligente (Garante 1 Passeio sem repetir, 1 Almoço e 1 Janta podendo repetir)
         function generateRandomItinerary() {
             availableSpots = [...allSpots];
             itinerary = { dia1: [], dia2: [], dia3: [], dia4: [] };
@@ -704,20 +704,16 @@
                 return shuffled;
             }
 
-            // Categorias Exatas
             const isLunch = (s) => s.time === 'Almoço';
             const isDinner = (s) => s.time === 'Jantar';
             const isActivity = (s) => !isLunch(s) && !isDinner(s);
 
             let allLunchSpots = allSpots.filter(isLunch);
             let allDinnerSpots = allSpots.filter(isDinner);
-            
-            // Embaralha as atividades, que serão retiradas uma a uma sem voltar (sem repetir)
             let activitySpots = shuffleArray(allSpots.filter(isActivity));
 
             const totalDays = ['dia1', 'dia2', 'dia3', 'dia4'];
 
-            // Função para peso e ordenação na linha do tempo
             const getWeight = (time) => {
                 const t = time.toLowerCase();
                 if (t.includes('manhã')) return 1;
@@ -731,30 +727,22 @@
             };
 
             totalDays.forEach(day => {
-                // Remove (pop) 1 atividade do array embaralhado, impedindo que ela volte a aparecer
                 const act = activitySpots.pop();
-                
-                // Escolhe um restaurante aleatório do array global, o que permite que eles se possam repetir em dias diferentes
                 const lun = allLunchSpots[Math.floor(Math.random() * allLunchSpots.length)];
                 const din = allDinnerSpots[Math.floor(Math.random() * allDinnerSpots.length)];
                 
-                let dayItems = [act, lun, din].filter(Boolean); // Ignora caso a lista de atividades acabe
-                
-                // Ordena-os cronologicamente (Ex: Passeio -> Almoço -> Janta)
+                let dayItems = [act, lun, din].filter(Boolean);
                 dayItems.sort((a, b) => getWeight(a.time) - getWeight(b.time));
-                
                 itinerary[day].push(...dayItems);
             });
 
-            // Re-constrói a lista de locais disponíveis (excluindo os que já entraram no roteiro)
             let usedIds = [];
             totalDays.forEach(day => {
                 itinerary[day].forEach(item => usedIds.push(item.id));
             });
             availableSpots = allSpots.filter(s => !usedIds.includes(s.id));
 
-            saveData(); // Atualiza o cache antes da renderização
-
+            saveData();
             renderCatalog();
             renderAllDays();
             switchTab('dia1');
