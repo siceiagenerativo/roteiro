@@ -298,6 +298,21 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmação para Limpar Tudo -->
+    <div id="clear-modal" class="fixed inset-0 z-[600] hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300 p-6 text-center">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-trash-alt text-2xl text-red-500"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Limpar Roteiro?</h3>
+            <p class="text-slate-500 text-sm mb-6">Esta ação irá remover todos os passeios já planeados nos dias. Esta ação não poderá ser desfeita.</p>
+            <div class="flex gap-3">
+                <button onclick="closeClearModal()" class="flex-1 bg-slate-100 text-slate-700 font-semibold py-2.5 rounded-xl hover:bg-slate-200 transition-colors">Cancelar</button>
+                <button onclick="confirmClearItinerary()" class="flex-1 bg-red-500 text-white font-semibold py-2.5 rounded-xl hover:bg-red-600 transition-colors shadow-md shadow-red-500/30">Sim, Limpar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal do Mapa Responsivo -->
     <div id="map-modal" class="fixed inset-0 z-[100] hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-5xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col md:flex-row h-[90vh] md:h-[75vh] relative">
@@ -327,12 +342,12 @@
         // SISTEMA PWA & INSTALAÇÃO ROBUSTA
         // ==========================================
         
-        // 1. Injetar Manifesto Dinamicamente (Garante o URL correto de onde a app está aberta)
+        // 1. Injetar Manifesto Dinamicamente
         const manifestData = {
             name: "Planeador Maceió",
             short_name: "Roteiro Maceió",
             description: "Crie o seu roteiro perfeito para Maceió.",
-            start_url: window.location.href.split('?')[0], // Limpa parâmetros da URL
+            start_url: window.location.href.split('?')[0],
             display: "standalone",
             background_color: "#f8fafc",
             theme_color: "#00b4d8",
@@ -344,7 +359,7 @@
         const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/manifest+json' });
         document.getElementById('dynamic-manifest').href = URL.createObjectURL(manifestBlob);
 
-        // 2. Lógica da Janela de Instalação (Híbrida: Nativa ou Manual)
+        // 2. Lógica da Janela de Instalação PWA
         let deferredPrompt;
         const pwaBanner = document.getElementById('pwa-install-banner');
         const pwaInstallBtn = document.getElementById('pwa-install-btn');
@@ -362,24 +377,20 @@
             localStorage.setItem('pwaMaceioDismissed', 'true');
         }
 
-        // Interceta o evento de instalação padrão (Se o Android permitir nativamente)
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             if (!localStorage.getItem('pwaMaceioDismissed')) showInstallBanner();
         });
 
-        // Evento do Botão de Instalação
         pwaInstallBtn.addEventListener('click', async () => {
             if (deferredPrompt) {
-                // Instalação Nativa e Automática (Android)
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 if (outcome === 'accepted') dismissInstallBanner();
                 deferredPrompt = null;
             } else {
-                // Instalação Manual Guiada (Para navegadores estritos ou iOS)
-                pwaInstallBtn.classList.add('hidden'); // Esconde o botão e mostra guia
+                pwaInstallBtn.classList.add('hidden');
                 const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
                 
                 if (isIos) {
@@ -390,16 +401,13 @@
             }
         });
 
-        // Deteta abertura da página para forçar a verificação da janela
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-                
-                // Se a app NÃO estiver instalada e o utilizador NÃO a tiver dispensado, mostra a janela
                 if (!isStandalone && !localStorage.getItem('pwaMaceioDismissed')) {
                     showInstallBanner();
                 }
-            }, 3000); // Aguarda 3 segundos para não interromper a leitura inicial
+            }, 3000);
         });
 
         // ==========================================
@@ -439,7 +447,6 @@
         ]`;
 
         const allSpots = JSON.parse(spotsJSON);
-        let availableSpots = [];
         let itinerary = { dia1: [], dia2: [], dia3: [], dia4: [] };
         let toastTimeout;
 
@@ -448,18 +455,15 @@
             if (savedData) {
                 try {
                     const parsed = JSON.parse(savedData);
-                    availableSpots = parsed.availableSpots;
-                    itinerary = parsed.itinerary;
+                    itinerary = parsed.itinerary || { dia1: [], dia2: [], dia3: [], dia4: [] };
                 } catch (e) {
-                    availableSpots = [...allSpots];
+                    itinerary = { dia1: [], dia2: [], dia3: [], dia4: [] };
                 }
-            } else {
-                availableSpots = [...allSpots];
             }
         }
 
         function saveData() {
-            localStorage.setItem('maceioRoteiroData', JSON.stringify({ availableSpots, itinerary }));
+            localStorage.setItem('maceioRoteiroData', JSON.stringify({ itinerary }));
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -502,23 +506,42 @@
             }, 3000);
         }
 
+        // Função auxiliar para gerar os botões do catálogo
+        function getBtnHTML(spot, dayId, dayLabel, shortLabel) {
+            // Verifica se este local já foi adicionado ao dia em questão
+            const inDay = itinerary[dayId].some(s => s.id === spot.id);
+            if (inDay) {
+                // Se já estiver adicionado, mostra o botão Verde "Adicionado" que ao passar o rato vira "Remover"
+                return `<button onclick="removeFromDay('${spot.id}', '${dayId}')" class="bg-emerald-500 text-white border border-transparent text-xs md:text-sm py-2 rounded-lg md:rounded-xl font-medium flex items-center justify-center md:gap-1.5 shadow-sm hover:bg-red-500 transition-colors group" title="Remover do ${dayLabel}">
+                    <span class="md:hidden group-hover:hidden"><i class="fas fa-check"></i></span>
+                    <span class="md:hidden hidden group-hover:inline"><i class="fas fa-times"></i></span>
+                    <span class="hidden md:inline group-hover:hidden"><i class="fas fa-check text-xs"></i> ${dayLabel}</span>
+                    <span class="hidden group-hover:md:inline"><i class="fas fa-times text-xs"></i> Remover</span>
+                </button>`;
+            } else {
+                // Botão padrão de adicionar
+                return `<button onclick="addToDay('${spot.id}', '${dayId}')" class="bg-slate-50 hover:bg-ocean hover:text-white border border-slate-100 hover:border-transparent text-slate-700 text-xs md:text-sm py-2 rounded-lg md:rounded-xl transition-all font-medium flex items-center justify-center md:gap-1.5 shadow-sm">
+                    <span class="md:hidden">${shortLabel}</span>
+                    <span class="hidden md:inline"><i class="fas fa-calendar-day text-xs"></i> ${dayLabel}</span>
+                </button>`;
+            }
+        }
+
         function renderCatalog() {
             const grid = document.getElementById('catalog-grid');
             grid.innerHTML = '';
 
-            if (availableSpots.length === 0) {
-                grid.innerHTML = `
-                    <div class="col-span-full text-center py-12 md:py-16 bg-white/50 rounded-3xl border border-white mx-4 md:mx-0">
-                        <i class="fas fa-check-circle text-5xl md:text-6xl text-emerald-400 mb-3 md:mb-4"></i>
-                        <h3 class="text-xl md:text-2xl font-bold text-slate-700">Todos os passeios selecionados!</h3>
-                        <p class="text-slate-500 mt-1 md:mt-2 text-sm md:text-base">Navegue pelas abas dos dias para ver o seu roteiro.</p>
-                    </div>`;
-                return;
-            }
-
-            availableSpots.forEach(spot => {
+            // Agora percorremos todos os locais disponíveis no catálogo sempre
+            allSpots.forEach(spot => {
                 const card = document.createElement('div');
                 card.className = 'bg-white rounded-2xl md:rounded-3xl shadow-xl hover:shadow-2xl overflow-hidden card-hover border border-white flex flex-col h-full fade-in';
+                
+                // Geração dinâmica dos botões para saberem o seu próprio estado
+                const btnD1 = getBtnHTML(spot, 'dia1', 'Dia 1', 'D1');
+                const btnD2 = getBtnHTML(spot, 'dia2', 'Dia 2', 'D2');
+                const btnD3 = getBtnHTML(spot, 'dia3', 'Dia 3', 'D3');
+                const btnD4 = getBtnHTML(spot, 'dia4', 'Dia 4', 'D4');
+
                 card.innerHTML = `
                     <div class="relative h-44 md:h-48 overflow-hidden group">
                         <img src="${spot.img}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
@@ -534,20 +557,12 @@
                     <div class="p-4 md:p-5 flex-grow flex flex-col justify-between bg-white">
                         <p class="text-slate-500 text-xs md:text-sm mb-4 md:mb-5 line-clamp-3">${spot.desc}</p>
                         <div class="mt-auto">
-                            <p class="text-[10px] md:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 md:mb-3 text-center">Adicionar ao:</p>
+                            <p class="text-[10px] md:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 md:mb-3 text-center">Gestão no Roteiro:</p>
                             <div class="grid grid-cols-4 md:grid-cols-2 gap-1.5 md:gap-2">
-                                <button onclick="addToDay('${spot.id}', 'dia1')" class="bg-slate-50 hover:bg-ocean hover:text-white border border-slate-100 hover:border-transparent text-slate-700 text-xs md:text-sm py-2 rounded-lg md:rounded-xl transition-all font-medium flex items-center justify-center md:gap-1.5 shadow-sm">
-                                    <span class="md:hidden">D1</span><span class="hidden md:inline"><i class="fas fa-calendar-day text-xs"></i> Dia 1</span>
-                                </button>
-                                <button onclick="addToDay('${spot.id}', 'dia2')" class="bg-slate-50 hover:bg-ocean hover:text-white border border-slate-100 hover:border-transparent text-slate-700 text-xs md:text-sm py-2 rounded-lg md:rounded-xl transition-all font-medium flex items-center justify-center md:gap-1.5 shadow-sm">
-                                    <span class="md:hidden">D2</span><span class="hidden md:inline"><i class="fas fa-calendar-day text-xs"></i> Dia 2</span>
-                                </button>
-                                <button onclick="addToDay('${spot.id}', 'dia3')" class="bg-slate-50 hover:bg-ocean hover:text-white border border-slate-100 hover:border-transparent text-slate-700 text-xs md:text-sm py-2 rounded-lg md:rounded-xl transition-all font-medium flex items-center justify-center md:gap-1.5 shadow-sm">
-                                    <span class="md:hidden">D3</span><span class="hidden md:inline"><i class="fas fa-calendar-day text-xs"></i> Dia 3</span>
-                                </button>
-                                <button onclick="addToDay('${spot.id}', 'dia4')" class="bg-slate-50 hover:bg-ocean hover:text-white border border-slate-100 hover:border-transparent text-slate-700 text-xs md:text-sm py-2 rounded-lg md:rounded-xl transition-all font-medium flex items-center justify-center md:gap-1.5 shadow-sm">
-                                    <span class="md:hidden">D4</span><span class="hidden md:inline"><i class="fas fa-calendar-day text-xs"></i> Dia 4</span>
-                                </button>
+                                ${btnD1}
+                                ${btnD2}
+                                ${btnD3}
+                                ${btnD4}
                             </div>
                         </div>
                     </div>
@@ -626,10 +641,13 @@
         }
 
         function addToDay(spotId, dayId) {
-            const spotIndex = availableSpots.findIndex(s => s.id === spotId);
-            if (spotIndex > -1) {
-                const spot = availableSpots.splice(spotIndex, 1)[0];
-                itinerary[dayId].push(spot);
+            // Previne adições duplas do mesmo local no mesmo dia
+            if (itinerary[dayId].some(s => s.id === spotId)) return;
+            
+            const spot = allSpots.find(s => s.id === spotId);
+            if (spot) {
+                // Adiciona uma cópia do spot ao dia
+                itinerary[dayId].push({...spot});
                 
                 const getWeight = (time) => {
                     const t = time.toLowerCase();
@@ -645,7 +663,7 @@
                 itinerary[dayId].sort((a, b) => getWeight(a.time) - getWeight(b.time));
                 
                 saveData();
-                renderCatalog();
+                renderCatalog(); // Atualiza os botões do catálogo para verde
                 renderAllDays();
                 
                 const numeroDia = dayId.replace('dia', '');
@@ -656,43 +674,52 @@
         function removeFromDay(spotId, dayId) {
             const spotIndex = itinerary[dayId].findIndex(s => s.id === spotId);
             if (spotIndex > -1) {
-                const spot = itinerary[dayId].splice(spotIndex, 1)[0];
-                
-                let stillInItinerary = false;
-                ['dia1', 'dia2', 'dia3', 'dia4'].forEach(day => {
-                    if (itinerary[day].some(s => s.id === spot.id)) {
-                        stillInItinerary = true;
-                    }
-                });
-
-                if (!stillInItinerary && !availableSpots.some(s => s.id === spot.id)) {
-                    availableSpots.push(spot);
-                }
+                itinerary[dayId].splice(spotIndex, 1);
                 
                 saveData();
-                renderCatalog();
+                renderCatalog(); // Atualiza os botões do catálogo de volta ao normal
                 renderAllDays();
                 showToast('Removido do roteiro.', 'error');
             }
         }
 
+        // Nova Lógica de Limpar Tudo utilizando o Modal HTML em vez de Confirm do Navegador
         function clearItinerary() {
-            if (availableSpots.length === allSpots.length) return;
+            // Se tudo já estiver vazio, não faz nada
+            const isEmpty = Object.values(itinerary).every(day => day.length === 0);
+            if (isEmpty) return;
             
-            if (confirm("Tem a certeza de que deseja remover todos os passeios do seu roteiro?")) {
-                availableSpots = [...allSpots];
-                itinerary = { dia1: [], dia2: [], dia3: [], dia4: [] };
-                
-                saveData();
-                renderCatalog();
-                renderAllDays();
-                showToast('O roteiro foi limpo.', 'error');
-                switchTab('catalogo');
-            }
+            // Abre o modal
+            const modal = document.getElementById('clear-modal');
+            modal.classList.remove('hidden');
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            modal.querySelector('div').classList.remove('scale-95');
+        }
+
+        function closeClearModal() {
+            // Fecha o modal
+            const modal = document.getElementById('clear-modal');
+            modal.classList.add('opacity-0');
+            modal.querySelector('div').classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function confirmClearItinerary() {
+            // Executa a limpeza
+            itinerary = { dia1: [], dia2: [], dia3: [], dia4: [] };
+            
+            saveData();
+            renderCatalog();
+            renderAllDays();
+            closeClearModal();
+            showToast('O roteiro foi limpo.', 'error');
+            switchTab('catalogo');
         }
 
         function generateRandomItinerary() {
-            availableSpots = [...allSpots];
             itinerary = { dia1: [], dia2: [], dia3: [], dia4: [] };
 
             function shuffleArray(array) {
@@ -735,12 +762,6 @@
                 dayItems.sort((a, b) => getWeight(a.time) - getWeight(b.time));
                 itinerary[day].push(...dayItems);
             });
-
-            let usedIds = [];
-            totalDays.forEach(day => {
-                itinerary[day].forEach(item => usedIds.push(item.id));
-            });
-            availableSpots = allSpots.filter(s => !usedIds.includes(s.id));
 
             saveData();
             renderCatalog();
