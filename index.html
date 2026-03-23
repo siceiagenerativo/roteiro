@@ -212,18 +212,28 @@
         };
 
         const App = () => {
-            // Inicializar estado a partir da Local Storage (ou estado vazio por defeito)
+            // Número de Dias Configuráveis
+            const [numDays, setNumDays] = useState(() => {
+                const saved = localStorage.getItem('maceioNumDays');
+                return saved ? parseInt(saved, 10) : 0;
+            });
+            const [setupModalOpen, setSetupModalOpen] = useState(numDays === 0);
+            const [tempDays, setTempDays] = useState(numDays || 4);
+
+            const activeDays = useMemo(() => Array.from({ length: numDays || 4 }, (_, i) => `dia${i + 1}`), [numDays]);
+
+            // Inicializar estado a partir da Local Storage
             const [itinerary, setItinerary] = useState(() => {
                 const savedData = localStorage.getItem('maceioRoteiroData');
                 if (savedData) {
                     try {
                         const parsed = JSON.parse(savedData);
-                        return parsed.itinerary || { dia1: [], dia2: [], dia3: [], dia4: [] };
+                        return parsed.itinerary || {};
                     } catch (e) {
-                        return { dia1: [], dia2: [], dia3: [], dia4: [] };
+                        return {};
                     }
                 }
-                return { dia1: [], dia2: [], dia3: [], dia4: [] };
+                return {};
             });
 
             const [activeTab, setActiveTab] = useState('catalogo');
@@ -237,10 +247,34 @@
             // Estado para PWA Banner
             const [pwaBanner, setPwaBanner] = useState({ show: false, mode: null, deferredPrompt: null });
 
+            // Sincronizar tempDays quando o modal abre
+            useEffect(() => {
+                if (setupModalOpen) {
+                    setTempDays(numDays || 4);
+                }
+            }, [setupModalOpen, numDays]);
+
             // Salvar na localStorage sempre que itinerary mudar
             useEffect(() => {
                 localStorage.setItem('maceioRoteiroData', JSON.stringify({ itinerary }));
             }, [itinerary]);
+
+            // Garantir que a estrutura inicial dos dias existe no itinerário
+            useEffect(() => {
+                if (numDays > 0) {
+                    setItinerary(prev => {
+                        const newItin = { ...prev };
+                        let hasChanges = false;
+                        for (let i = 1; i <= numDays; i++) {
+                            if (!newItin[`dia${i}`]) {
+                                newItin[`dia${i}`] = [];
+                                hasChanges = true;
+                            }
+                        }
+                        return hasChanges ? newItin : prev;
+                    });
+                }
+            }, [numDays]);
 
             // Mostrar Toast helper
             const showToastMessage = (message, type = 'success') => {
@@ -248,14 +282,27 @@
                 setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
             };
 
+            const confirmConfigDays = () => {
+                setNumDays(tempDays);
+                localStorage.setItem('maceioNumDays', tempDays);
+                setSetupModalOpen(false);
+                
+                // Redirecionar se estiver numa aba de um dia apagado
+                if (activeTab.startsWith('dia')) {
+                    const dayNum = parseInt(activeTab.replace('dia', ''));
+                    if (dayNum > tempDays) setActiveTab('catalogo');
+                }
+                showToastMessage('Dias configurados com sucesso!');
+            };
+
             // Adicionar Passeio
             const addToDay = (spotId, dayId) => {
-                if (itinerary[dayId].some(s => s.id === spotId)) return;
+                if (!itinerary[dayId] || itinerary[dayId].some(s => s.id === spotId)) return;
                 
                 const spot = allSpots.find(s => s.id === spotId);
                 if (spot) {
                     setItinerary(prev => {
-                        const newDayList = [...prev[dayId], { ...spot }];
+                        const newDayList = [...(prev[dayId] || []), { ...spot }];
                         newDayList.sort((a, b) => getWeight(a.time) - getWeight(b.time));
                         return { ...prev, [dayId]: newDayList };
                     });
@@ -272,6 +319,8 @@
             // Remover Passeio (Confirmação)
             const confirmRemoveFromDay = () => {
                 const { spotId, dayId } = removeModal;
+                if (!itinerary[dayId]) return;
+
                 setItinerary(prev => {
                     const newDayList = prev[dayId].filter(s => s.id !== spotId);
                     return { ...prev, [dayId]: newDayList };
@@ -282,7 +331,9 @@
 
             // Confirmar Limpeza
             const confirmClearItinerary = () => {
-                setItinerary({ dia1: [], dia2: [], dia3: [], dia4: [] });
+                let emptyItin = {};
+                activeDays.forEach(d => emptyItin[d] = []);
+                setItinerary(emptyItin);
                 setClearModalOpen(false);
                 showToastMessage('O roteiro foi limpo.', 'error');
                 setActiveTab('catalogo');
@@ -299,10 +350,9 @@
                 
                 let activitySpots = [...allSpots.filter(isActivity)].sort(() => Math.random() - 0.5); // Shuffle
                 
-                const totalDays = ['dia1', 'dia2', 'dia3', 'dia4'];
-                let newItinerary = { dia1: [], dia2: [], dia3: [], dia4: [] };
-
-                totalDays.forEach(day => {
+                let newItinerary = {};
+                activeDays.forEach(day => {
+                    newItinerary[day] = [];
                     const act = activitySpots.pop();
                     const lun = allLunchSpots[Math.floor(Math.random() * allLunchSpots.length)];
                     const din = allDinnerSpots[Math.floor(Math.random() * allDinnerSpots.length)];
@@ -328,7 +378,6 @@
                 };
                 window.addEventListener('beforeinstallprompt', handler);
 
-                // Checar standalone após 3 segs
                 const timer = setTimeout(() => {
                     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
                     if (!isStandalone && !localStorage.getItem('pwaMaceioDismissed')) {
@@ -360,7 +409,7 @@
             };
 
             return (
-                <div className="flex flex-col min-h-screen">
+                <div className="flex flex-col min-h-screen relative">
                     {/* Header */}
                     <header className="hero-bg h-[50vh] md:h-[60vh] flex items-center justify-center relative overflow-hidden">
                         <div className="text-center text-white px-4 z-10 w-full max-w-4xl">
@@ -390,14 +439,18 @@
                             <button onClick={() => setActiveTab('catalogo')} className={`tab-btn glass-tab px-4 py-2 md:px-6 md:py-3 rounded-full font-medium text-sm md:text-base transition-all duration-300 flex items-center gap-2 shadow-sm ${activeTab === 'catalogo' ? 'tab-active' : 'text-slate-700'}`}>
                                 <i className="fas fa-map-marked-alt text-base md:text-lg"></i> <span className="hidden sm:inline">Pontos Turísticos</span><span className="sm:hidden">Catálogo</span>
                             </button>
-                            {['dia1', 'dia2', 'dia3', 'dia4'].map(day => (
+                            {activeDays.map(day => (
                                 <button key={day} onClick={() => setActiveTab(day)} className={`tab-btn glass-tab px-4 py-2 md:px-6 md:py-3 rounded-full font-medium text-sm md:text-base transition-all duration-300 flex items-center gap-2 shadow-sm ${activeTab === day ? 'tab-active' : 'text-slate-700'}`}>
                                     Dia {day.replace('dia', '')} 
-                                    {itinerary[day].length > 0 && (
+                                    {(itinerary[day] && itinerary[day].length > 0) && (
                                         <span className={`text-[10px] md:text-xs px-2 py-0.5 rounded-full ${activeTab === day ? 'bg-white text-ocean' : 'bg-ocean text-white'}`}>{itinerary[day].length}</span>
                                     )}
                                 </button>
                             ))}
+                            {/* Settings Button */}
+                            <button onClick={() => setSetupModalOpen(true)} className="glass-tab px-3 py-2 md:px-4 md:py-3 rounded-full text-slate-500 hover:text-ocean transition-colors shadow-sm" title="Configurar Quantidade de Dias">
+                                <i className="fas fa-cog text-base md:text-lg"></i>
+                            </button>
                         </div>
 
                         {/* Content Area */}
@@ -413,7 +466,7 @@
                                         </div>
                                         <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
                                             <button onClick={() => {
-                                                const isEmpty = Object.values(itinerary).every(day => day.length === 0);
+                                                const isEmpty = activeDays.every(day => !itinerary[day] || itinerary[day].length === 0);
                                                 if (!isEmpty) setClearModalOpen(true);
                                             }} className="flex-1 lg:flex-none inline-flex justify-center items-center gap-2 bg-white text-red-500 border border-red-100 font-medium py-2.5 md:py-3 px-6 rounded-full hover:bg-red-50 hover:border-red-200 transition-all duration-300 shadow-sm transform hover:-translate-y-1 text-sm md:text-base">
                                                 <i className="fas fa-trash-alt"></i> Limpar Tudo
@@ -441,22 +494,22 @@
                                                 <div className="p-4 md:p-5 flex-grow flex flex-col justify-between bg-white">
                                                     <p className="text-slate-500 text-xs md:text-sm mb-4 md:mb-5 line-clamp-3">{spot.desc}</p>
                                                     <div className="mt-auto">
-                                                        <p className="text-[10px] md:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 md:mb-3 text-center">Gestão no Roteiro:</p>
-                                                        <div className="grid grid-cols-4 md:grid-cols-2 gap-1.5 md:gap-2">
-                                                            {['dia1', 'dia2', 'dia3', 'dia4'].map(day => {
-                                                                const isAdded = itinerary[day].some(s => s.id === spot.id);
+                                                        <p className="text-[10px] md:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 md:mb-3 text-center">Adicionar ao:</p>
+                                                        <div className="flex flex-wrap gap-1.5 md:gap-2 justify-center">
+                                                            {activeDays.map(day => {
+                                                                const isAdded = (itinerary[day] || []).some(s => s.id === spot.id);
                                                                 const dayNum = day.replace('dia', '');
                                                                 
                                                                 if (isAdded) {
                                                                     return (
-                                                                        <button key={day} onClick={() => requestRemoveFromDay(spot.id, day)} className="bg-emerald-500 hover:bg-emerald-600 text-white border border-transparent text-xs md:text-sm py-2 rounded-lg md:rounded-xl transition-all font-medium flex items-center justify-center md:gap-1.5 shadow-sm" title={`Remover do Dia ${dayNum}`}>
-                                                                            <span className="md:hidden"><i className="fas fa-check"></i></span>
+                                                                        <button key={day} onClick={() => requestRemoveFromDay(spot.id, day)} className="flex-grow bg-emerald-500 hover:bg-emerald-600 text-white border border-transparent text-xs md:text-sm py-2 px-2 rounded-lg md:rounded-xl transition-all font-medium flex items-center justify-center gap-1 shadow-sm" title={`Remover do Dia ${dayNum}`}>
+                                                                            <span className="md:hidden"><i className="fas fa-check"></i> D{dayNum}</span>
                                                                             <span className="hidden md:inline"><i className="fas fa-check text-xs"></i> Dia {dayNum}</span>
                                                                         </button>
                                                                     );
                                                                 } else {
                                                                     return (
-                                                                        <button key={day} onClick={() => addToDay(spot.id, day)} className="bg-slate-50 hover:bg-ocean hover:text-white border border-slate-100 hover:border-transparent text-slate-700 text-xs md:text-sm py-2 rounded-lg md:rounded-xl transition-all font-medium flex items-center justify-center md:gap-1.5 shadow-sm">
+                                                                        <button key={day} onClick={() => addToDay(spot.id, day)} className="flex-grow bg-slate-50 hover:bg-ocean hover:text-white border border-slate-100 hover:border-transparent text-slate-700 text-xs md:text-sm py-2 px-2 rounded-lg md:rounded-xl transition-all font-medium flex items-center justify-center gap-1 shadow-sm">
                                                                             <span className="md:hidden">D{dayNum}</span>
                                                                             <span className="hidden md:inline"><i className="fas fa-calendar-day text-xs"></i> Dia {dayNum}</span>
                                                                         </button>
@@ -473,7 +526,7 @@
                             )}
 
                             {/* Days Views */}
-                            {['dia1', 'dia2', 'dia3', 'dia4'].map(day => (
+                            {activeDays.map(day => (
                                 activeTab === day && (
                                     <div key={day} className="fade-in relative timeline-container pb-8 md:pb-12">
                                         <div className="text-center mb-10 md:mb-16">
@@ -481,7 +534,7 @@
                                             <div className="w-16 md:w-20 h-1 bg-gradient-to-r from-ocean-light to-ocean mx-auto mt-3 md:mt-4 rounded-full"></div>
                                         </div>
                                         
-                                        {itinerary[day].length === 0 ? (
+                                        {!itinerary[day] || itinerary[day].length === 0 ? (
                                             <div className="text-center py-12 md:py-16 bg-white/50 rounded-2xl md:rounded-3xl border border-dashed border-slate-300 max-w-2xl mx-auto shadow-sm">
                                                 <i className="fas fa-map-signs text-4xl md:text-5xl text-slate-300 mb-3 md:mb-4"></i>
                                                 <h3 className="text-lg md:text-xl font-bold text-slate-600">Dia Livre</h3>
@@ -532,6 +585,46 @@
                     <footer className="bg-slate-900 text-slate-400 py-8 md:py-10 text-center mt-8 md:mt-12 border-t border-slate-800 text-sm md:text-base">
                         <p className="font-light tracking-wide px-4">Desenvolvido com <i className="fas fa-heart text-coral mx-1 animate-pulse"></i> para a sua viagem a Maceió.</p>
                     </footer>
+
+                    {/* Modal de Configuração de Dias (Abre na primeira visita) */}
+                    {setupModalOpen && (
+                        <div className="fixed inset-0 z-[700] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 fade-in">
+                            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 text-center relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-ocean to-ocean-dark"></div>
+                                <div className="w-20 h-20 bg-ocean/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <i className="fas fa-calendar-alt text-4xl text-ocean"></i>
+                                </div>
+                                <h3 className="text-2xl font-bold text-slate-800 mb-2">Quantos dias vai ficar?</h3>
+                                <p className="text-slate-500 text-sm mb-8">Configure a duração da sua viagem para prepararmos as abas do roteiro.</p>
+                                
+                                <div className="flex items-center justify-center gap-6 mb-8">
+                                    <button 
+                                        onClick={() => setTempDays(Math.max(1, tempDays - 1))}
+                                        className="w-12 h-12 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-xl text-slate-600 transition-colors shadow-sm">
+                                        <i className="fas fa-minus"></i>
+                                    </button>
+                                    <span className="text-5xl font-bold text-ocean w-16">{tempDays}</span>
+                                    <button 
+                                        onClick={() => setTempDays(Math.min(14, tempDays + 1))}
+                                        className="w-12 h-12 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-xl text-slate-600 transition-colors shadow-sm">
+                                        <i className="fas fa-plus"></i>
+                                    </button>
+                                </div>
+
+                                <button 
+                                    onClick={confirmConfigDays}
+                                    className="w-full bg-gradient-to-r from-ocean to-ocean-dark text-white font-bold py-3.5 rounded-xl hover:shadow-lg hover:shadow-ocean/30 transition-all transform hover:-translate-y-1">
+                                    Confirmar
+                                </button>
+                                
+                                {numDays > 0 && (
+                                    <button onClick={() => setSetupModalOpen(false)} className="mt-5 text-slate-400 hover:text-slate-600 text-sm font-medium transition-colors">
+                                        Cancelar
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Toast */}
                     <div className={`toast ${toast.show ? 'show' : ''} ${toast.type === 'error' ? 'error' : ''}`}>
@@ -617,9 +710,11 @@
         // Componente do Mapa Isolado
         const MapModal = ({ config, onClose }) => {
             const mapRef = useRef(null);
+            const [routeInfo, setRouteInfo] = useState(null);
 
             useEffect(() => {
                 let mapInstance = null;
+                setRouteInfo(null); // Reseta as informações de rota sempre que abrir
 
                 if (config.show && config.spot && mapRef.current) {
                     // Inicializa o mapa com o novo elemento DOM
@@ -649,12 +744,27 @@
                             L.marker([userLat, userLng], {icon: userIcon})
                                 .addTo(mapInstance)
                                 .bindPopup('<b>Você</b><br>A sua localização atual.');
+                                
+                            // Fetch Distância e Tempo (API OSRM de Código Aberto)
+                            fetch(`https://router.project-osrm.org/route/v1/driving/${userLng},${userLat};${config.spot.lng},${config.spot.lat}?overview=false`)
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.routes && data.routes.length > 0) {
+                                        const route = data.routes[0];
+                                        setRouteInfo({
+                                            distance: (route.distance / 1000).toFixed(1), // km
+                                            duration: Math.round(route.duration / 60) // minutos
+                                        });
+                                    }
+                                })
+                                .catch(err => console.error("Erro ao calcular rota:", err));
+                                
                         }, err => {
                             console.log("Localização indisponível.");
                         });
                     }
 
-                    // Força o recálculo do tamanho do mapa após a animação do modal terminar para evitar fundo cinzento
+                    // Força o recálculo do tamanho do mapa após a animação do modal terminar
                     const timerAnim = setTimeout(() => {
                         if (mapInstance) {
                             mapInstance.invalidateSize();
@@ -664,7 +774,7 @@
                     return () => {
                         clearTimeout(timerAnim);
                         if (mapInstance) {
-                            mapInstance.remove(); // Limpa a instância do Leaflet corretamente ao fechar
+                            mapInstance.remove(); // Limpa a instância do Leaflet
                         }
                     };
                 }
@@ -678,6 +788,21 @@
                         <button onClick={onClose} className="absolute top-3 right-3 md:top-4 md:right-4 z-[400] bg-white text-slate-700 hover:text-red-500 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-lg transition-colors border border-slate-100">
                             <i className="fas fa-times md:text-lg"></i>
                         </button>
+                        
+                        {/* Box Flutuante de Rota (Aparece apenas quando calculado) */}
+                        {routeInfo && (
+                            <div className="absolute top-3 left-3 md:top-4 md:left-4 z-[400] bg-white/95 backdrop-blur-md p-3 px-4 rounded-xl shadow-lg border border-slate-200 fade-in flex flex-col gap-1.5">
+                                <div className="flex items-center gap-2 text-slate-800 text-sm font-bold">
+                                    <i className="fas fa-car text-ocean"></i>
+                                    <span>{routeInfo.duration} minutos</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-slate-500 text-[11px] md:text-xs">
+                                    <i className="fas fa-route"></i>
+                                    <span>{routeInfo.distance} km de distância</span>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="w-full md:w-1/3 h-40 md:h-full relative flex-shrink-0">
                             <img src={config.spot.img} className="w-full h-full object-cover" alt="Local" />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 md:via-black/30 to-transparent"></div>
