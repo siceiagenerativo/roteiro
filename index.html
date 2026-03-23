@@ -12,18 +12,24 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Roteiro Maceió">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-    
-    <!-- Link para o Manifesto (será injetado via JS para garantir compatibilidade máxima) -->
     <link rel="manifest" id="dynamic-manifest">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome para Ícones -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Leaflet CSS para o Mapa Interativo -->
+    <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- React & ReactDOM (CDNs) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel para compilar JSX no navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -69,16 +75,14 @@
         .text-shadow-lg { text-shadow: 2px 4px 8px rgba(0,0,0,0.5); }
 
         .fade-in {
-            animation: fadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-            opacity: 0;
+            animation: fadeIn 0.4s ease-out forwards;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Estilos da Linha do Tempo Mobile-Optimized */
         .timeline-container::before {
             content: '';
             position: absolute;
@@ -98,7 +102,6 @@
             .timeline-item:nth-child(odd) .timeline-dot { left: 50%; }
         }
 
-        /* Abas responsivas */
         .glass-tab {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(8px);
@@ -119,7 +122,7 @@
             transform: translateY(-2px);
         }
 
-        .card-hover { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .card-hover { transition: all 0.3s ease; }
         .card-hover:hover {
             transform: translateY(-6px) scale(1.01);
             box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
@@ -133,216 +136,14 @@
         @media (max-width: 767px) {
             .timeline-item:hover .timeline-dot { transform: scale(1.15); }
         }
-
-        /* Notificação (Toast) */
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: #10b981;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 50px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            opacity: 0;
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            pointer-events: none;
-        }
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-        .toast.error {
-            background: #ef4444;
-        }
     </style>
 </head>
 <body class="text-slate-800 antialiased selection:bg-ocean selection:text-white">
 
-    <!-- Secção Hero Limpa -->
-    <header class="hero-bg h-[50vh] md:h-[60vh] flex items-center justify-center relative overflow-hidden">
-        <div class="text-center text-white px-4 z-10 w-full max-w-4xl">
-            <div class="inline-block mb-4 px-5 py-2 rounded-full border border-white/30 backdrop-blur-md bg-white/10 shadow-lg">
-                <span class="uppercase tracking-[0.2em] md:tracking-[0.3em] text-xs md:text-sm font-semibold text-sand">Personalize a sua Viagem</span>
-            </div>
-            <h1 class="font-serif text-5xl md:text-7xl font-bold mb-2 text-shadow-lg leading-tight">Maceió <br><span class="text-3xl md:text-5xl text-ocean-light font-style: italic block mt-2">O Seu Roteiro Perfeito</span></h1>
-        </div>
-        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20">
-            <svg class="relative block w-full h-[40px] md:h-[100px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.08,130.83,123.63,192.27,108.86,236.4,98.66,280.4,76.51,321.39,56.44Z" fill="url(#wave-gradient)"></path>
-                <defs>
-                    <linearGradient id="wave-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#f8fafc" />
-                        <stop offset="100%" stop-color="#e0f2fe" />
-                    </linearGradient>
-                </defs>
-            </svg>
-        </div>
-    </header>
+    <div id="root"></div>
 
-    <!-- Conteúdo Principal -->
-    <main id="planeador" class="container mx-auto px-4 py-8 md:py-16 max-w-6xl relative z-30">
-        
-        <!-- Navegação de Abas -->
-        <div class="relative bg-white/60 backdrop-blur-md border-b border-slate-200 py-3 px-4 -mx-4 md:px-8 md:-mx-8 mb-8 md:mb-12 flex flex-wrap justify-center gap-2 md:gap-3 items-center transition-all">
-            <button onclick="switchTab('catalogo')" id="btn-catalogo" class="tab-btn tab-active glass-tab px-4 py-2 md:px-6 md:py-3 rounded-full text-slate-700 font-medium text-sm md:text-base transition-all duration-300 flex items-center gap-2 shadow-sm">
-                <i class="fas fa-map-marked-alt text-ocean text-base md:text-lg"></i> <span class="hidden sm:inline">Pontos Turísticos</span><span class="sm:hidden">Catálogo</span>
-            </button>
-            <button onclick="switchTab('dia1')" id="btn-dia1" class="tab-btn glass-tab px-4 py-2 md:px-6 md:py-3 rounded-full text-slate-700 font-medium text-sm md:text-base transition-all duration-300 flex items-center gap-2 shadow-sm">
-                Dia 1 <span id="badge-dia1" class="hidden bg-ocean text-white text-[10px] md:text-xs px-2 py-0.5 rounded-full">0</span>
-            </button>
-            <button onclick="switchTab('dia2')" id="btn-dia2" class="tab-btn glass-tab px-4 py-2 md:px-6 md:py-3 rounded-full text-slate-700 font-medium text-sm md:text-base transition-all duration-300 flex items-center gap-2 shadow-sm">
-                Dia 2 <span id="badge-dia2" class="hidden bg-ocean text-white text-[10px] md:text-xs px-2 py-0.5 rounded-full">0</span>
-            </button>
-            <button onclick="switchTab('dia3')" id="btn-dia3" class="tab-btn glass-tab px-4 py-2 md:px-6 md:py-3 rounded-full text-slate-700 font-medium text-sm md:text-base transition-all duration-300 flex items-center gap-2 shadow-sm">
-                Dia 3 <span id="badge-dia3" class="hidden bg-ocean text-white text-[10px] md:text-xs px-2 py-0.5 rounded-full">0</span>
-            </button>
-            <button onclick="switchTab('dia4')" id="btn-dia4" class="tab-btn glass-tab px-4 py-2 md:px-6 md:py-3 rounded-full text-slate-700 font-medium text-sm md:text-base transition-all duration-300 flex items-center gap-2 shadow-sm">
-                Dia 4 <span id="badge-dia4" class="hidden bg-ocean text-white text-[10px] md:text-xs px-2 py-0.5 rounded-full">0</span>
-            </button>
-        </div>
-
-        <!-- CONTEÚDO DINÂMICO -->
-        <div class="relative min-h-[400px] md:min-h-[500px]">
-
-            <!-- Aba: Catálogo de Passeios -->
-            <div id="catalogo" class="day-content relative fade-in">
-                <div class="flex flex-col lg:flex-row justify-between items-center mb-8 md:mb-10 bg-white/60 backdrop-blur-md p-5 md:p-6 rounded-3xl border border-white shadow-sm gap-5 md:gap-6">
-                    <div class="text-center lg:text-left">
-                        <h2 class="text-2xl md:text-3xl font-serif font-bold text-slate-800">Escolha os seus Passeios</h2>
-                        <p class="text-slate-500 text-sm md:text-base mt-1 md:mt-2">Adicione os locais aos dias desejados.</p>
-                    </div>
-                    <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                        <button onclick="clearItinerary()" class="flex-1 lg:flex-none inline-flex justify-center items-center gap-2 bg-white text-red-500 border border-red-100 font-medium py-2.5 md:py-3 px-6 rounded-full hover:bg-red-50 hover:border-red-200 transition-all duration-300 shadow-sm transform hover:-translate-y-1 text-sm md:text-base">
-                            <i class="fas fa-trash-alt"></i> Limpar Tudo
-                        </button>
-                        <button onclick="generateRandomItinerary()" class="flex-1 lg:flex-none inline-flex justify-center items-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold py-2.5 md:py-3 px-6 rounded-full hover:from-purple-400 hover:to-indigo-500 transition-all duration-300 shadow-[0_8px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_12px_20px_rgba(99,102,241,0.4)] transform hover:-translate-y-1 text-sm md:text-base">
-                            <i class="fas fa-magic"></i> Estou com Sorte!
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Grelha do Catálogo gerada via JS -->
-                <div id="catalog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                    <!-- Os cartões serão injetados aqui -->
-                </div>
-            </div>
-
-            <!-- Abas dos Dias -->
-            <div id="dia1" class="day-content hidden relative timeline-container pb-8 md:pb-12">
-                <div class="text-center mb-10 md:mb-16"><h2 class="text-3xl md:text-4xl font-serif font-bold text-slate-800">Roteiro: Dia 1</h2><div class="w-16 md:w-20 h-1 bg-gradient-to-r from-ocean-light to-ocean mx-auto mt-3 md:mt-4 rounded-full"></div></div>
-                <div id="timeline-dia1"></div>
-            </div>
-
-            <div id="dia2" class="day-content hidden relative timeline-container pb-8 md:pb-12">
-                <div class="text-center mb-10 md:mb-16"><h2 class="text-3xl md:text-4xl font-serif font-bold text-slate-800">Roteiro: Dia 2</h2><div class="w-16 md:w-20 h-1 bg-gradient-to-r from-ocean-light to-ocean mx-auto mt-3 md:mt-4 rounded-full"></div></div>
-                <div id="timeline-dia2"></div>
-            </div>
-
-            <div id="dia3" class="day-content hidden relative timeline-container pb-8 md:pb-12">
-                <div class="text-center mb-10 md:mb-16"><h2 class="text-3xl md:text-4xl font-serif font-bold text-slate-800">Roteiro: Dia 3</h2><div class="w-16 md:w-20 h-1 bg-gradient-to-r from-ocean-light to-ocean mx-auto mt-3 md:mt-4 rounded-full"></div></div>
-                <div id="timeline-dia3"></div>
-            </div>
-
-            <div id="dia4" class="day-content hidden relative timeline-container pb-8 md:pb-12">
-                <div class="text-center mb-10 md:mb-16"><h2 class="text-3xl md:text-4xl font-serif font-bold text-slate-800">Roteiro: Dia 4</h2><div class="w-16 md:w-20 h-1 bg-gradient-to-r from-ocean-light to-ocean mx-auto mt-3 md:mt-4 rounded-full"></div></div>
-                <div id="timeline-dia4"></div>
-            </div>
-
-        </div>
-    </main>
-
-    <footer class="bg-slate-900 text-slate-400 py-8 md:py-10 text-center mt-8 md:mt-12 border-t border-slate-800 text-sm md:text-base">
-        <p class="font-light tracking-wide px-4">Desenvolvido com <i class="fas fa-heart text-coral mx-1 animate-pulse"></i> para a sua viagem a Maceió.</p>
-    </footer>
-
-    <!-- Elemento Toast para Notificações -->
-    <div id="toast" class="toast">
-        <i class="fas fa-check-circle text-lg"></i>
-        <span id="toast-message">Adicionado com sucesso!</span>
-    </div>
-
-    <!-- Banner de Instalação PWA Robusto -->
-    <div id="pwa-install-banner" class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-[350px] bg-white rounded-2xl shadow-2xl transform translate-y-40 opacity-0 transition-all duration-500 z-[500] flex flex-col overflow-hidden border border-slate-100 hidden">
-        <div class="bg-gradient-to-r from-ocean to-ocean-dark p-4 flex justify-between items-center text-white">
-            <div class="flex items-center gap-3">
-                <div class="bg-white/20 w-10 h-10 flex items-center justify-center rounded-xl backdrop-blur-sm"><i class="fas fa-plane-departure text-xl"></i></div>
-                <div>
-                    <h4 class="font-bold text-sm">Instalar Planeador</h4>
-                    <p class="text-[10px] text-white/80">Acesso rápido no seu ecrã inicial</p>
-                </div>
-            </div>
-        </div>
-        <div class="p-4 bg-white flex justify-end gap-3">
-            <button onclick="dismissInstallBanner()" class="text-slate-500 hover:text-slate-700 font-medium px-3 py-1.5 text-xs transition-colors rounded-lg">Mais Tarde</button>
-            <button id="pwa-install-btn" class="bg-ocean hover:bg-ocean-dark text-white font-bold px-5 py-2 rounded-xl text-xs shadow-md transition-colors flex items-center gap-2">
-                <i class="fas fa-download"></i> Instalar App
-            </button>
-        </div>
-        
-        <!-- Instruções Manuais para iOS -->
-        <div id="ios-instructions" class="hidden p-4 bg-slate-50 text-xs text-slate-600 border-t border-slate-100 leading-relaxed text-center">
-            <p>Para instalar no iPhone/iPad: <br>Toque no ícone <i class="fas fa-share-square text-ocean mx-1 text-base"></i> <strong>Partilhar</strong> na barra do navegador e selecione <br><strong>"Adicionar ao Ecrã Principal"</strong>.</p>
-        </div>
-        
-        <!-- Instruções Manuais para Android -->
-        <div id="android-instructions" class="hidden p-4 bg-slate-50 text-xs text-slate-600 border-t border-slate-100 leading-relaxed text-center">
-            <p>Para instalar no Android: <br>Toque no menu <i class="fas fa-ellipsis-v text-ocean mx-1 text-base"></i> (três pontos) no canto superior direito e selecione <br><strong>"Adicionar ao Ecrã Principal"</strong> ou <strong>"Instalar Aplicação"</strong>.</p>
-        </div>
-    </div>
-
-    <!-- Modal de Confirmação para Limpar Tudo -->
-    <div id="clear-modal" class="fixed inset-0 z-[600] hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300 p-6 text-center">
-            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-trash-alt text-2xl text-red-500"></i>
-            </div>
-            <h3 class="text-xl font-bold text-slate-800 mb-2">Limpar Roteiro?</h3>
-            <p class="text-slate-500 text-sm mb-6">Esta ação irá remover todos os passeios já planeados nos dias. Esta ação não poderá ser desfeita.</p>
-            <div class="flex gap-3">
-                <button onclick="closeClearModal()" class="flex-1 bg-slate-100 text-slate-700 font-semibold py-2.5 rounded-xl hover:bg-slate-200 transition-colors">Cancelar</button>
-                <button onclick="confirmClearItinerary()" class="flex-1 bg-red-500 text-white font-semibold py-2.5 rounded-xl hover:bg-red-600 transition-colors shadow-md shadow-red-500/30">Sim, Limpar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal do Mapa Responsivo -->
-    <div id="map-modal" class="fixed inset-0 z-[100] hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-5xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col md:flex-row h-[90vh] md:h-[75vh] relative">
-            <button onclick="closeMapModal()" class="absolute top-3 right-3 md:top-4 md:right-4 z-[400] bg-white text-slate-700 hover:text-red-500 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-lg transition-colors border border-slate-100">
-                <i class="fas fa-times md:text-lg"></i>
-            </button>
-            <div class="w-full md:w-1/3 h-40 md:h-full relative flex-shrink-0">
-                <img id="modal-img" src="" class="w-full h-full object-cover" alt="Imagem do Local">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 md:via-black/30 to-transparent"></div>
-                <div class="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 text-white">
-                    <h3 id="modal-title" class="text-xl md:text-2xl font-bold mb-1 md:mb-2 text-shadow-sm leading-tight pr-8"></h3>
-                    <p id="modal-desc" class="text-xs md:text-sm opacity-90 leading-relaxed hidden sm:block"></p>
-                </div>
-            </div>
-            <div class="w-full md:w-2/3 h-full relative z-10 bg-slate-100" id="map-container">
-                <!-- Leaflet Map será renderizado aqui -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
-    <!-- LÓGICA DA APLICAÇÃO -->
+    <!-- Gerar Manifesto Dinâmico -->
     <script>
-        // ==========================================
-        // SISTEMA PWA & INSTALAÇÃO ROBUSTA
-        // ==========================================
-        
-        // 1. Injetar Manifesto Dinamicamente
         const manifestData = {
             name: "Planeador Maceió",
             short_name: "Roteiro Maceió",
@@ -358,492 +159,520 @@
         };
         const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/manifest+json' });
         document.getElementById('dynamic-manifest').href = URL.createObjectURL(manifestBlob);
+    </script>
 
-        // 2. Lógica da Janela de Instalação PWA
-        let deferredPrompt;
-        const pwaBanner = document.getElementById('pwa-install-banner');
-        const pwaInstallBtn = document.getElementById('pwa-install-btn');
-        const iosInstructions = document.getElementById('ios-instructions');
-        const androidInstructions = document.getElementById('android-instructions');
+    <!-- Código React da Aplicação -->
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
 
-        function showInstallBanner() {
-            pwaBanner.classList.remove('hidden');
-            setTimeout(() => { pwaBanner.classList.remove('translate-y-40', 'opacity-0'); }, 100);
-        }
+        // Base de Dados
+        const allSpots = [
+            { id: "ponta-verde", title: "Orla de Ponta Verde", img: "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&q=80&w=800", desc: "Caminhada pelo calçadão mais bonito do Brasil. Tire uma foto no letreiro 'Eu Amo Maceió'.", time: "Manhã", icon: "fa-sun", color: "from-amber-300 to-orange-400", lat: -9.6644, lng: -35.7051 },
+            { id: "piscinas-paju", title: "Piscinas Naturais de Pajuçara", img: "https://images.unsplash.com/photo-1582650517598-a616226db2ba?auto=format&fit=crop&q=80&w=800", desc: "Embarque numa jangada rústica até às famosas piscinas naturais para nadar com os peixinhos.", time: "Manhã/Tarde", icon: "fa-water", color: "from-ocean-light to-ocean", lat: -9.6740, lng: -35.7144 },
+            { id: "bodega-sertao", title: "Bodega do Sertão", img: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&q=80&w=800", desc: "Famoso restaurante com um bule gigante na fachada. Perfeito para o autêntico sabor nordestino.", time: "Almoço", icon: "fa-utensils", color: "from-amber-500 to-orange-600", lat: -9.6468, lng: -35.7005 },
+            { id: "feirinha", title: "Feirinha de Artesanato", img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=800", desc: "Compre lembranças locais e passeie por este tradicional mercado noturno na orla.", time: "Noite", icon: "fa-moon", color: "from-indigo-400 to-indigo-600", lat: -9.6720, lng: -35.7160 },
+            { id: "gunga", title: "Praia do Gunga & Falésias", img: "https://images.unsplash.com/photo-1596423736561-1c3902fcd2e6?auto=format&fit=crop&q=80&w=800", desc: "Uma das praias mais bonitas do Brasil. Inclui passeio de buggy nas falésias e banho de lagoa.", time: "Dia Inteiro", icon: "fa-route", color: "from-orange-400 to-red-500", lat: -9.8601, lng: -35.9037 },
+            { id: "massagueira", title: "Polo da Massagueira", img: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=800", desc: "Maior polo gastronómico ao ar livre do Nordeste, na beira da lagoa. Especialista em frutos do mar.", time: "Almoço", icon: "fa-fish", color: "from-cyan-500 to-blue-600", lat: -9.7121, lng: -35.8231 },
+            { id: "frances", title: "Praia do Francês", img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=800", desc: "Águas calmas protegidas por uma barreira de corais de um lado, e ondas para surf do outro.", time: "Manhã/Tarde", icon: "fa-umbrella-beach", color: "from-emerald-400 to-emerald-600", lat: -9.7667, lng: -35.8413 },
+            { id: "jantar-jatiuca", title: "Polo Gastronómico Jatiúca", img: "https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&q=80&w=800", desc: "Explore a alta gastronomia da cidade, provando pratos variados num ambiente vibrante.", time: "Jantar", icon: "fa-utensils", color: "from-rose-400 to-rose-600", lat: -9.6482, lng: -35.7001 },
+            { id: "lopana", title: "Lopana Beach Bar", img: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=800", desc: "O bar de praia mais famoso de Maceió. Ótima infraestrutura, música ao vivo e pratos deliciosos.", time: "Almoço", icon: "fa-umbrella-beach", color: "from-yellow-400 to-amber-500", lat: -9.6631, lng: -35.7042 },
+            { id: "ipioca", title: "Ipioca & Beach Club", img: "https://images.unsplash.com/photo-1499793983690-e29da00ef1c2?auto=format&fit=crop&q=80&w=800", desc: "Refúgio perfeito no Litoral Norte. Passe o dia a relaxar com conforto num Beach Club.", time: "Dia Inteiro", icon: "fa-cocktail", color: "from-teal-400 to-emerald-500", lat: -9.5186, lng: -35.5861 },
+            { id: "imperador", title: "Imperador dos Camarões", img: "https://images.unsplash.com/photo-1600891964092-4316c288032e?auto=format&fit=crop&q=80&w=800", desc: "Casa do famoso prato 'Chiclete de Camarão'. Uma experiência gastronómica imperdível.", time: "Jantar", icon: "fa-shrimp", color: "from-rose-500 to-red-600", lat: -9.6731, lng: -35.7132 },
+            { id: "centro-hist", title: "Bairro Histórico de Jaraguá", img: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&q=80&w=800", desc: "Aprecie a arquitetura dos antigos armazéns, casarões e museus no berço histórico de Maceió.", time: "Manhã", icon: "fa-landmark", color: "from-purple-400 to-purple-600", lat: -9.6711, lng: -35.7262 },
+            { id: "lagoa", title: "Passeio das 9 Ilhas", img: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&q=80&w=800", desc: "Navegue pela Lagoa Mundaú no fim de tarde e desfrute de um pôr do sol inesquecível na água.", time: "Fim de Tarde", icon: "fa-ship", color: "from-blue-400 to-indigo-500", lat: -9.6953, lng: -35.7601 },
+            { id: "divina-gula", title: "Divina Gula", img: "https://images.unsplash.com/photo-1627054234551-cefa6d86411d?auto=format&fit=crop&q=80&w=800", desc: "Restaurante premiado que mistura a culinária mineira com ingredientes alagoanos.", time: "Jantar", icon: "fa-star", color: "from-orange-400 to-orange-600", lat: -9.6451, lng: -35.7012 },
+            { id: "milagres", title: "São Miguel dos Milagres", img: "https://images.unsplash.com/photo-1590418606746-018840f9cb25?auto=format&fit=crop&q=80&w=800", desc: "Bate-volta para a Rota Ecológica. Piscinas naturais quase desertas e coqueirais.", time: "Dia Inteiro", icon: "fa-camera", color: "from-cyan-400 to-blue-500", lat: -9.2676, lng: -35.3725 },
+            { id: "parmegianno", title: "Restaurante Parmegianno", img: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=800", desc: "Um clássico da cidade, famoso por pratos muito bem servidos. Ótimo para repor as energias.", time: "Almoço", icon: "fa-utensils", color: "from-red-400 to-red-600", lat: -9.6651, lng: -35.7032 },
+            { id: "paripueira", title: "Piscinas de Paripueira", img: "https://images.unsplash.com/photo-1538331269258-6c97a6bde206?auto=format&fit=crop&q=80&w=800", desc: "Extensas piscinas naturais com águas mornas, ideais para observar a vida marinha.", time: "Manhã/Tarde", icon: "fa-fish", color: "from-sky-400 to-sky-600", lat: -9.4589, lng: -35.5398 },
+            { id: "maria-antonieta", title: "Maria Antonieta", img: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=800", desc: "Restaurante italiano com uma belíssima árvore de ferro iluminada no centro do salão.", time: "Jantar", icon: "fa-wine-glass-alt", color: "from-purple-500 to-purple-700", lat: -9.6441, lng: -35.7022 },
+            { id: "mirante", title: "Mirante de São Gonçalo", img: "https://images.unsplash.com/photo-1506462945848-ac8ea6f609dc?auto=format&fit=crop&q=80&w=800", desc: "Uma vista panorâmica maravilhosa da cidade, do porto de Maceió e de toda a orla.", time: "Fim de Tarde", icon: "fa-binoculars", color: "from-stone-400 to-stone-600", lat: -9.6586, lng: -35.7351 },
+            { id: "tabuba", title: "Praia de Tabuba", img: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?auto=format&fit=crop&q=80&w=800", desc: "Praia de águas mansas e mornas, perfeita para banho e encontro do rio com o mar.", time: "Manhã/Tarde", icon: "fa-umbrella-beach", color: "from-cyan-400 to-cyan-600", lat: -9.4975, lng: -35.5683 },
+            { id: "carro-quebrado", title: "Praia de Carro Quebrado", img: "https://images.unsplash.com/photo-1624314138470-5a2f24623f10?auto=format&fit=crop&q=80&w=800", desc: "Famosa pelas altas falésias de areia colorida e natureza praticamente selvagem.", time: "Dia Inteiro", icon: "fa-car", color: "from-orange-500 to-red-500", lat: -9.3636, lng: -35.4542 },
+            { id: "parque-municipal", title: "Parque Municipal de Maceió", img: "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&q=80&w=800", desc: "Reserva de Mata Atlântica dentro da cidade, ideal para trilhas ecológicas e piqueniques.", time: "Manhã", icon: "fa-tree", color: "from-green-500 to-green-700", lat: -9.6200, lng: -35.7533 },
+            { id: "museu-theo", title: "Museu Théo Brandão", img: "https://images.unsplash.com/photo-1518998053401-878ae37c2646?auto=format&fit=crop&q=80&w=800", desc: "Acervo riquíssimo de arte popular e cultura alagoana num imponente casarão histórico.", time: "Tarde", icon: "fa-museum", color: "from-stone-500 to-stone-700", lat: -9.6685, lng: -35.7330 },
+            { id: "catedral", title: "Catedral Metropolitana", img: "https://images.unsplash.com/photo-1548625361-ecce18835845?auto=format&fit=crop&q=80&w=800", desc: "Bela arquitetura neoclássica no centro de Maceió, um marco histórico e religioso.", time: "Manhã", icon: "fa-church", color: "from-purple-300 to-purple-500", lat: -9.6648, lng: -35.7355 },
+            { id: "guaxuma", title: "Praia de Guaxuma", img: "https://images.unsplash.com/photo-1505881502353-a1986add3762?auto=format&fit=crop&q=80&w=800", desc: "Praia com quiosques muito bem estruturados, mar um pouco mais agitado e rodeada de coqueiros.", time: "Manhã/Tarde", icon: "fa-water", color: "from-blue-300 to-blue-500", lat: -9.5833, lng: -35.6667 },
+            { id: "sonho-verde", title: "Praia de Sonho Verde", img: "https://images.unsplash.com/photo-1520483601560-389dff434fdf?auto=format&fit=crop&q=80&w=800", desc: "Tranquilidade absoluta e mar muito manso formam o cenário perfeito para relaxar em família.", time: "Dia Inteiro", icon: "fa-leaf", color: "from-emerald-300 to-emerald-500", lat: -9.4333, lng: -35.5167 },
+            { id: "mercado-producao", title: "Mercado da Produção", img: "https://images.unsplash.com/photo-1533900298318-6b8da08a523e?auto=format&fit=crop&q=80&w=800", desc: "O lugar certo para conhecer a cultura local a fundo e comprar produtos regionais autênticos.", time: "Manhã", icon: "fa-shopping-basket", color: "from-yellow-500 to-yellow-700", lat: -9.6600, lng: -35.7400 },
+            { id: "jangada-ponta", title: "Jangada na Ponta Verde", img: "https://images.unsplash.com/photo-1534008897995-27a23e859048?auto=format&fit=crop&q=80&w=800", desc: "Passeio relaxante até o farol da Ponta Verde durante a maré baixa para fotos incríveis.", time: "Manhã", icon: "fa-sailboat", color: "from-sky-300 to-sky-500", lat: -9.6644, lng: -35.7051 },
+            { id: "santuario-tereza", title: "Santuário Santa Tereza", img: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=800", desc: "Piscina natural de águas cristalinas rodeada de uma deslumbrante e silenciosa mata preservada.", time: "Dia Inteiro", icon: "fa-dove", color: "from-teal-500 to-teal-700", lat: -9.3100, lng: -35.4100 }
+        ];
 
-        function dismissInstallBanner() {
-            pwaBanner.classList.add('translate-y-40', 'opacity-0');
-            setTimeout(() => { pwaBanner.classList.add('hidden'); }, 500);
-            localStorage.setItem('pwaMaceioDismissed', 'true');
-        }
+        // Lógica de Ordenação
+        const getWeight = (time) => {
+            const t = time.toLowerCase();
+            if (t.includes('manhã')) return 1;
+            if (t.includes('dia inteiro')) return 1;
+            if (t.includes('almoço')) return 2;
+            if (t.includes('tarde')) return 3;
+            if (t.includes('fim de tarde')) return 4;
+            if (t.includes('noite')) return 5;
+            if (t.includes('jantar')) return 6;
+            return 10;
+        };
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            if (!localStorage.getItem('pwaMaceioDismissed')) showInstallBanner();
-        });
-
-        pwaInstallBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') dismissInstallBanner();
-                deferredPrompt = null;
-            } else {
-                pwaInstallBtn.classList.add('hidden');
-                const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-                
-                if (isIos) {
-                    iosInstructions.classList.remove('hidden');
-                } else {
-                    androidInstructions.classList.remove('hidden');
+        const App = () => {
+            // Inicializar estado a partir da Local Storage (ou estado vazio por defeito)
+            const [itinerary, setItinerary] = useState(() => {
+                const savedData = localStorage.getItem('maceioRoteiroData');
+                if (savedData) {
+                    try {
+                        const parsed = JSON.parse(savedData);
+                        return parsed.itinerary || { dia1: [], dia2: [], dia3: [], dia4: [] };
+                    } catch (e) {
+                        return { dia1: [], dia2: [], dia3: [], dia4: [] };
+                    }
                 }
-            }
-        });
-
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-                if (!isStandalone && !localStorage.getItem('pwaMaceioDismissed')) {
-                    showInstallBanner();
-                }
-            }, 3000);
-        });
-
-        // ==========================================
-        // BASE DE DADOS & LÓGICA DO ROTEIRO
-        // ==========================================
-        
-        const spotsJSON = `[
-            { "id": "ponta-verde", "title": "Orla de Ponta Verde", "img": "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&q=80&w=800", "desc": "Caminhada pelo calçadão mais bonito do Brasil. Tire uma foto no letreiro 'Eu Amo Maceió'.", "time": "Manhã", "icon": "fa-sun", "color": "from-amber-300 to-orange-400", "lat": -9.6644, "lng": -35.7051 },
-            { "id": "piscinas-paju", "title": "Piscinas Naturais de Pajuçara", "img": "https://images.unsplash.com/photo-1582650517598-a616226db2ba?auto=format&fit=crop&q=80&w=800", "desc": "Embarque numa jangada rústica até às famosas piscinas naturais para nadar com os peixinhos.", "time": "Manhã/Tarde", "icon": "fa-water", "color": "from-ocean-light to-ocean", "lat": -9.6740, "lng": -35.7144 },
-            { "id": "bodega-sertao", "title": "Bodega do Sertão", "img": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&q=80&w=800", "desc": "Famoso restaurante com um bule gigante na fachada. Perfeito para o autêntico sabor nordestino.", "time": "Almoço", "icon": "fa-utensils", "color": "from-amber-500 to-orange-600", "lat": -9.6468, "lng": -35.7005 },
-            { "id": "feirinha", "title": "Feirinha de Artesanato", "img": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=800", "desc": "Compre lembranças locais e passeie por este tradicional mercado noturno na orla.", "time": "Noite", "icon": "fa-moon", "color": "from-indigo-400 to-indigo-600", "lat": -9.6720, "lng": -35.7160 },
-            { "id": "gunga", "title": "Praia do Gunga & Falésias", "img": "https://images.unsplash.com/photo-1596423736561-1c3902fcd2e6?auto=format&fit=crop&q=80&w=800", "desc": "Uma das praias mais bonitas do Brasil. Inclui passeio de buggy nas falésias e banho de lagoa.", "time": "Dia Inteiro", "icon": "fa-route", "color": "from-orange-400 to-red-500", "lat": -9.8601, "lng": -35.9037 },
-            { "id": "massagueira", "title": "Polo da Massagueira", "img": "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=800", "desc": "Maior polo gastronómico ao ar livre do Nordeste, na beira da lagoa. Especialista em frutos do mar.", "time": "Almoço", "icon": "fa-fish", "color": "from-cyan-500 to-blue-600", "lat": -9.7121, "lng": -35.8231 },
-            { "id": "frances", "title": "Praia do Francês", "img": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=800", "desc": "Águas calmas protegidas por uma barreira de corais de um lado, e ondas para surf do outro.", "time": "Manhã/Tarde", "icon": "fa-umbrella-beach", "color": "from-emerald-400 to-emerald-600", "lat": -9.7667, "lng": -35.8413 },
-            { "id": "jantar-jatiuca", "title": "Polo Gastronómico Jatiúca", "img": "https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&q=80&w=800", "desc": "Explore a alta gastronomia da cidade, provando pratos variados num ambiente vibrante.", "time": "Jantar", "icon": "fa-utensils", "color": "from-rose-400 to-rose-600", "lat": -9.6482, "lng": -35.7001 },
-            { "id": "lopana", "title": "Lopana Beach Bar", "img": "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=800", "desc": "O bar de praia mais famoso de Maceió. Ótima infraestrutura, música ao vivo e pratos deliciosos.", "time": "Almoço", "icon": "fa-umbrella-beach", "color": "from-yellow-400 to-amber-500", "lat": -9.6631, "lng": -35.7042 },
-            { "id": "ipioca", "title": "Ipioca & Beach Club", "img": "https://images.unsplash.com/photo-1499793983690-e29da00ef1c2?auto=format&fit=crop&q=80&w=800", "desc": "Refúgio perfeito no Litoral Norte. Passe o dia a relaxar com conforto num Beach Club.", "time": "Dia Inteiro", "icon": "fa-cocktail", "color": "from-teal-400 to-emerald-500", "lat": -9.5186, "lng": -35.5861 },
-            { "id": "imperador", "title": "Imperador dos Camarões", "img": "https://images.unsplash.com/photo-1600891964092-4316c288032e?auto=format&fit=crop&q=80&w=800", "desc": "Casa do famoso prato 'Chiclete de Camarão'. Uma experiência gastronómica imperdível.", "time": "Jantar", "icon": "fa-shrimp", "color": "from-rose-500 to-red-600", "lat": -9.6731, "lng": -35.7132 },
-            { "id": "centro-hist", "title": "Bairro Histórico de Jaraguá", "img": "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&q=80&w=800", "desc": "Aprecie a arquitetura dos antigos armazéns, casarões e museus no berço histórico de Maceió.", "time": "Manhã", "icon": "fa-landmark", "color": "from-purple-400 to-purple-600", "lat": -9.6711, "lng": -35.7262 },
-            { "id": "lagoa", "title": "Passeio das 9 Ilhas", "img": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&q=80&w=800", "desc": "Navegue pela Lagoa Mundaú no fim de tarde e desfrute de um pôr do sol inesquecível na água.", "time": "Fim de Tarde", "icon": "fa-ship", "color": "from-blue-400 to-indigo-500", "lat": -9.6953, "lng": -35.7601 },
-            { "id": "divina-gula", "title": "Divina Gula", "img": "https://images.unsplash.com/photo-1627054234551-cefa6d86411d?auto=format&fit=crop&q=80&w=800", "desc": "Restaurante premiado que mistura a culinária mineira com ingredientes alagoanos.", "time": "Jantar", "icon": "fa-star", "color": "from-orange-400 to-orange-600", "lat": -9.6451, "lng": -35.7012 },
-            { "id": "milagres", "title": "São Miguel dos Milagres", "img": "https://images.unsplash.com/photo-1590418606746-018840f9cb25?auto=format&fit=crop&q=80&w=800", "desc": "Bate-volta para a Rota Ecológica. Piscinas naturais quase desertas e coqueirais.", "time": "Dia Inteiro", "icon": "fa-camera", "color": "from-cyan-400 to-blue-500", "lat": -9.2676, "lng": -35.3725 },
-            { "id": "parmegianno", "title": "Restaurante Parmegianno", "img": "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=800", "desc": "Um clássico da cidade, famoso por pratos muito bem servidos. Ótimo para repor as energias.", "time": "Almoço", "icon": "fa-utensils", "color": "from-red-400 to-red-600", "lat": -9.6651, "lng": -35.7032 },
-            { "id": "paripueira", "title": "Piscinas de Paripueira", "img": "https://images.unsplash.com/photo-1538331269258-6c97a6bde206?auto=format&fit=crop&q=80&w=800", "desc": "Extensas piscinas naturais com águas mornas, ideais para observar a vida marinha.", "time": "Manhã/Tarde", "icon": "fa-fish", "color": "from-sky-400 to-sky-600", "lat": -9.4589, "lng": -35.5398 },
-            { "id": "maria-antonieta", "title": "Maria Antonieta", "img": "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=800", "desc": "Restaurante italiano com uma belíssima árvore de ferro iluminada no centro do salão.", "time": "Jantar", "icon": "fa-wine-glass-alt", "color": "from-purple-500 to-purple-700", "lat": -9.6441, "lng": -35.7022 },
-            { "id": "mirante", "title": "Mirante de São Gonçalo", "img": "https://images.unsplash.com/photo-1506462945848-ac8ea6f609dc?auto=format&fit=crop&q=80&w=800", "desc": "Uma vista panorâmica maravilhosa da cidade, do porto de Maceió e de toda a orla.", "time": "Fim de Tarde", "icon": "fa-binoculars", "color": "from-stone-400 to-stone-600", "lat": -9.6586, "lng": -35.7351 },
-            { "id": "tabuba", "title": "Praia de Tabuba", "img": "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?auto=format&fit=crop&q=80&w=800", "desc": "Praia de águas mansas e mornas, perfeita para banho e encontro do rio com o mar.", "time": "Manhã/Tarde", "icon": "fa-umbrella-beach", "color": "from-cyan-400 to-cyan-600", "lat": -9.4975, "lng": -35.5683 },
-            { "id": "carro-quebrado", "title": "Praia de Carro Quebrado", "img": "https://images.unsplash.com/photo-1624314138470-5a2f24623f10?auto=format&fit=crop&q=80&w=800", "desc": "Famosa pelas altas falésias de areia colorida e natureza praticamente selvagem.", "time": "Dia Inteiro", "icon": "fa-car", "color": "from-orange-500 to-red-500", "lat": -9.3636, "lng": -35.4542 },
-            { "id": "parque-municipal", "title": "Parque Municipal de Maceió", "img": "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&q=80&w=800", "desc": "Reserva de Mata Atlântica dentro da cidade, ideal para trilhas ecológicas e piqueniques.", "time": "Manhã", "icon": "fa-tree", "color": "from-green-500 to-green-700", "lat": -9.6200, "lng": -35.7533 },
-            { "id": "museu-theo", "title": "Museu Théo Brandão", "img": "https://images.unsplash.com/photo-1518998053401-878ae37c2646?auto=format&fit=crop&q=80&w=800", "desc": "Acervo riquíssimo de arte popular e cultura alagoana num imponente casarão histórico.", "time": "Tarde", "icon": "fa-museum", "color": "from-stone-500 to-stone-700", "lat": -9.6685, "lng": -35.7330 },
-            { "id": "catedral", "title": "Catedral Metropolitana", "img": "https://images.unsplash.com/photo-1548625361-ecce18835845?auto=format&fit=crop&q=80&w=800", "desc": "Bela arquitetura neoclássica no centro de Maceió, um marco histórico e religioso.", "time": "Manhã", "icon": "fa-church", "color": "from-purple-300 to-purple-500", "lat": -9.6648, "lng": -35.7355 },
-            { "id": "guaxuma", "title": "Praia de Guaxuma", "img": "https://images.unsplash.com/photo-1505881502353-a1986add3762?auto=format&fit=crop&q=80&w=800", "desc": "Praia com quiosques muito bem estruturados, mar um pouco mais agitado e rodeada de coqueiros.", "time": "Manhã/Tarde", "icon": "fa-water", "color": "from-blue-300 to-blue-500", "lat": -9.5833, "lng": -35.6667 },
-            { "id": "sonho-verde", "title": "Praia de Sonho Verde", "img": "https://images.unsplash.com/photo-1520483601560-389dff434fdf?auto=format&fit=crop&q=80&w=800", "desc": "Tranquilidade absoluta e mar muito manso formam o cenário perfeito para relaxar em família.", "time": "Dia Inteiro", "icon": "fa-leaf", "color": "from-emerald-300 to-emerald-500", "lat": -9.4333, "lng": -35.5167 },
-            { "id": "mercado-producao", "title": "Mercado da Produção", "img": "https://images.unsplash.com/photo-1533900298318-6b8da08a523e?auto=format&fit=crop&q=80&w=800", "desc": "O lugar certo para conhecer a cultura local a fundo e comprar produtos regionais autênticos.", "time": "Manhã", "icon": "fa-shopping-basket", "color": "from-yellow-500 to-yellow-700", "lat": -9.6600, "lng": -35.7400 },
-            { "id": "jangada-ponta", "title": "Jangada na Ponta Verde", "img": "https://images.unsplash.com/photo-1534008897995-27a23e859048?auto=format&fit=crop&q=80&w=800", "desc": "Passeio relaxante até o farol da Ponta Verde durante a maré baixa para fotos incríveis.", "time": "Manhã", "icon": "fa-sailboat", "color": "from-sky-300 to-sky-500", "lat": -9.6644, "lng": -35.7051 },
-            { "id": "santuario-tereza", "title": "Santuário Santa Tereza", "img": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=800", "desc": "Piscina natural de águas cristalinas rodeada de uma deslumbrante e silenciosa mata preservada.", "time": "Dia Inteiro", "icon": "fa-dove", "color": "from-teal-500 to-teal-700", "lat": -9.3100, "lng": -35.4100 }
-        ]`;
-
-        const allSpots = JSON.parse(spotsJSON);
-        let itinerary = { dia1: [], dia2: [], dia3: [], dia4: [] };
-        let toastTimeout;
-
-        function loadData() {
-            const savedData = localStorage.getItem('maceioRoteiroData');
-            if (savedData) {
-                try {
-                    const parsed = JSON.parse(savedData);
-                    itinerary = parsed.itinerary || { dia1: [], dia2: [], dia3: [], dia4: [] };
-                } catch (e) {
-                    itinerary = { dia1: [], dia2: [], dia3: [], dia4: [] };
-                }
-            }
-        }
-
-        function saveData() {
-            localStorage.setItem('maceioRoteiroData', JSON.stringify({ itinerary }));
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadData();
-            renderCatalog();
-            renderAllDays();
-        });
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.day-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('tab-active'));
-            
-            const targetContent = document.getElementById(tabId);
-            targetContent.classList.remove('hidden');
-            document.getElementById('btn-' + tabId).classList.add('tab-active');
-            
-            targetContent.classList.remove('fade-in');
-            void targetContent.offsetWidth; 
-            targetContent.classList.add('fade-in');
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            const msgEl = document.getElementById('toast-message');
-            const icon = toast.querySelector('i');
-            
-            msgEl.innerText = message;
-            toast.className = 'toast show';
-            
-            if (type === 'error') {
-                toast.classList.add('error');
-                icon.className = 'fas fa-trash-alt md:text-lg';
-            } else {
-                icon.className = 'fas fa-check-circle md:text-lg';
-            }
-
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        // Função auxiliar para gerar os botões do catálogo
-        function getBtnHTML(spot, dayId, dayLabel, shortLabel) {
-            // Verifica se este local já foi adicionado ao dia em questão
-            const inDay = itinerary[dayId].some(s => s.id === spot.id);
-            if (inDay) {
-                // Se já estiver adicionado, mostra o botão Verde "Adicionado" que ao passar o rato vira "Remover"
-                return `<button onclick="removeFromDay('${spot.id}', '${dayId}')" class="bg-emerald-500 text-white border border-transparent text-xs md:text-sm py-2 rounded-lg md:rounded-xl font-medium flex items-center justify-center md:gap-1.5 shadow-sm hover:bg-red-500 transition-colors group" title="Remover do ${dayLabel}">
-                    <span class="md:hidden group-hover:hidden"><i class="fas fa-check"></i></span>
-                    <span class="md:hidden hidden group-hover:inline"><i class="fas fa-times"></i></span>
-                    <span class="hidden md:inline group-hover:hidden"><i class="fas fa-check text-xs"></i> ${dayLabel}</span>
-                    <span class="hidden group-hover:md:inline"><i class="fas fa-times text-xs"></i> Remover</span>
-                </button>`;
-            } else {
-                // Botão padrão de adicionar
-                return `<button onclick="addToDay('${spot.id}', '${dayId}')" class="bg-slate-50 hover:bg-ocean hover:text-white border border-slate-100 hover:border-transparent text-slate-700 text-xs md:text-sm py-2 rounded-lg md:rounded-xl transition-all font-medium flex items-center justify-center md:gap-1.5 shadow-sm">
-                    <span class="md:hidden">${shortLabel}</span>
-                    <span class="hidden md:inline"><i class="fas fa-calendar-day text-xs"></i> ${dayLabel}</span>
-                </button>`;
-            }
-        }
-
-        function renderCatalog() {
-            const grid = document.getElementById('catalog-grid');
-            grid.innerHTML = '';
-
-            // Agora percorremos todos os locais disponíveis no catálogo sempre
-            allSpots.forEach(spot => {
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-2xl md:rounded-3xl shadow-xl hover:shadow-2xl overflow-hidden card-hover border border-white flex flex-col h-full fade-in';
-                
-                // Geração dinâmica dos botões para saberem o seu próprio estado
-                const btnD1 = getBtnHTML(spot, 'dia1', 'Dia 1', 'D1');
-                const btnD2 = getBtnHTML(spot, 'dia2', 'Dia 2', 'D2');
-                const btnD3 = getBtnHTML(spot, 'dia3', 'Dia 3', 'D3');
-                const btnD4 = getBtnHTML(spot, 'dia4', 'Dia 4', 'D4');
-
-                card.innerHTML = `
-                    <div class="relative h-44 md:h-48 overflow-hidden group">
-                        <img src="${spot.img}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                        <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-[10px] md:text-xs font-bold text-slate-700 shadow-md flex items-center gap-1">
-                            <i class="far fa-clock"></i> ${spot.time}
-                        </div>
-                        <button onclick="openMapModal('${spot.id}')" title="Ver no Mapa" class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-ocean hover:text-white w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center hover:bg-ocean transition-colors shadow-lg z-20">
-                            <i class="fas fa-map-marker-alt text-sm md:text-base"></i>
-                        </button>
-                        <h3 class="absolute bottom-3 left-4 right-4 text-lg md:text-xl font-bold text-white text-shadow-sm leading-tight pr-10 md:pr-12">${spot.title}</h3>
-                    </div>
-                    <div class="p-4 md:p-5 flex-grow flex flex-col justify-between bg-white">
-                        <p class="text-slate-500 text-xs md:text-sm mb-4 md:mb-5 line-clamp-3">${spot.desc}</p>
-                        <div class="mt-auto">
-                            <p class="text-[10px] md:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 md:mb-3 text-center">Gestão no Roteiro:</p>
-                            <div class="grid grid-cols-4 md:grid-cols-2 gap-1.5 md:gap-2">
-                                ${btnD1}
-                                ${btnD2}
-                                ${btnD3}
-                                ${btnD4}
-                            </div>
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(card);
+                return { dia1: [], dia2: [], dia3: [], dia4: [] };
             });
-        }
 
-        function renderDay(dayId) {
-            const container = document.getElementById('timeline-' + dayId);
-            const items = itinerary[dayId];
-            const badge = document.getElementById('badge-' + dayId);
+            const [activeTab, setActiveTab] = useState('catalogo');
             
-            if (items.length > 0) {
-                badge.innerText = items.length;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
+            // Estado para os Modais e Toasts
+            const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+            const [clearModalOpen, setClearModalOpen] = useState(false);
+            const [mapModal, setMapModal] = useState({ show: false, spot: null });
 
-            container.innerHTML = '';
+            // Estado para PWA Banner
+            const [pwaBanner, setPwaBanner] = useState({ show: false, mode: null, deferredPrompt: null });
 
-            if (items.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-12 md:py-16 bg-white/50 rounded-2xl md:rounded-3xl border border-dashed border-slate-300 max-w-2xl mx-auto shadow-sm">
-                        <i class="fas fa-map-signs text-4xl md:text-5xl text-slate-300 mb-3 md:mb-4"></i>
-                        <h3 class="text-lg md:text-xl font-bold text-slate-600">Dia Livre</h3>
-                        <p class="text-slate-500 mb-5 md:mb-6 text-xs md:text-sm">Ainda não programou passeios para este dia.</p>
-                        <button onclick="switchTab('catalogo')" class="inline-flex items-center gap-2 bg-white border border-slate-200 text-slate-700 font-medium py-2 px-5 md:px-6 rounded-full hover:border-ocean hover:text-ocean transition-colors shadow-sm text-sm md:text-base">
-                            <i class="fas fa-plus"></i> Adicionar
-                        </button>
-                    </div>`;
-                return;
-            }
+            // Salvar na localStorage sempre que itinerary mudar
+            useEffect(() => {
+                localStorage.setItem('maceioRoteiroData', JSON.stringify({ itinerary }));
+            }, [itinerary]);
 
-            items.forEach((spot, index) => {
-                const itemHTML = `
-                    <div class="timeline-item relative mb-10 md:mb-16 w-full flex justify-end md:justify-center items-center pl-14 md:pl-0 fade-in" style="animation-delay: ${index * 0.1}s;">
-                        <div class="timeline-dot absolute left-6 md:left-1/2 w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br ${spot.color} rounded-full border-[3px] md:border-4 border-white shadow-lg z-10 transform -translate-x-1/2 flex items-center justify-center text-white transition-transform duration-300">
-                            <i class="fas ${spot.icon} text-sm md:text-base"></i>
-                        </div>
-                        
-                        <div class="timeline-content w-full md:w-[45%] ${index % 2 === 0 ? 'md:mr-auto' : 'md:ml-auto'} bg-white rounded-2xl md:rounded-3xl shadow-xl hover:shadow-2xl overflow-hidden card-hover border border-white relative group">
-                            <div class="absolute -right-4 -top-4 md:-right-6 md:-top-6 text-slate-50 opacity-40 text-7xl md:text-9xl pointer-events-none transform group-hover:rotate-12 transition-transform duration-500"><i class="fas ${spot.icon}"></i></div>
-                            
-                            <div class="relative h-44 md:h-56 overflow-hidden">
-                                <img src="${spot.img}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                                <div class="absolute top-3 left-3 md:top-4 md:left-4 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-[10px] md:text-xs font-bold text-slate-700 shadow-lg flex items-center gap-1">
-                                    <i class="far fa-clock"></i> ${spot.time}
-                                </div>
-                                <div class="absolute top-3 right-3 md:top-4 md:right-4 flex gap-1.5 md:gap-2 z-20">
-                                    <button onclick="openMapModal('${spot.id}')" title="Ver no Mapa" class="bg-white/90 backdrop-blur-sm text-ocean hover:text-white w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center hover:bg-ocean transition-colors shadow-lg">
-                                        <i class="fas fa-map-marker-alt text-sm md:text-base"></i>
-                                    </button>
-                                    <button onclick="removeFromDay('${spot.id}', '${dayId}')" title="Remover" class="bg-white/90 backdrop-blur-sm text-red-500 hover:text-white w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center hover:bg-red-500 transition-colors shadow-lg">
-                                        <i class="fas fa-times text-sm md:text-base"></i>
-                                    </button>
-                                </div>
-                                <h3 class="absolute bottom-3 left-4 right-4 md:bottom-4 md:left-5 md:right-5 text-lg md:text-2xl font-bold text-white text-shadow-sm leading-tight pr-20">${spot.title}</h3>
-                            </div>
-                            <div class="p-4 md:p-6 relative z-10 bg-white">
-                                <p class="text-slate-600 text-xs md:text-sm leading-relaxed">${spot.desc}</p>
-                            </div>
-                        </div>
-                    </div>`;
-                container.innerHTML += itemHTML;
-            });
-        }
-
-        function renderAllDays() {
-            renderDay('dia1');
-            renderDay('dia2');
-            renderDay('dia3');
-            renderDay('dia4');
-        }
-
-        function addToDay(spotId, dayId) {
-            // Previne adições duplas do mesmo local no mesmo dia
-            if (itinerary[dayId].some(s => s.id === spotId)) return;
-            
-            const spot = allSpots.find(s => s.id === spotId);
-            if (spot) {
-                // Adiciona uma cópia do spot ao dia
-                itinerary[dayId].push({...spot});
-                
-                const getWeight = (time) => {
-                    const t = time.toLowerCase();
-                    if (t.includes('manhã')) return 1;
-                    if (t.includes('dia inteiro')) return 1;
-                    if (t.includes('almoço')) return 2;
-                    if (t.includes('tarde')) return 3;
-                    if (t.includes('fim de tarde')) return 4;
-                    if (t.includes('noite')) return 5;
-                    if (t.includes('jantar')) return 6;
-                    return 10;
-                };
-                itinerary[dayId].sort((a, b) => getWeight(a.time) - getWeight(b.time));
-                
-                saveData();
-                renderCatalog(); // Atualiza os botões do catálogo para verde
-                renderAllDays();
-                
-                const numeroDia = dayId.replace('dia', '');
-                showToast(`Adicionado ao Dia ${numeroDia}!`);
-            }
-        }
-
-        function removeFromDay(spotId, dayId) {
-            const spotIndex = itinerary[dayId].findIndex(s => s.id === spotId);
-            if (spotIndex > -1) {
-                itinerary[dayId].splice(spotIndex, 1);
-                
-                saveData();
-                renderCatalog(); // Atualiza os botões do catálogo de volta ao normal
-                renderAllDays();
-                showToast('Removido do roteiro.', 'error');
-            }
-        }
-
-        // Nova Lógica de Limpar Tudo utilizando o Modal HTML em vez de Confirm do Navegador
-        function clearItinerary() {
-            // Se tudo já estiver vazio, não faz nada
-            const isEmpty = Object.values(itinerary).every(day => day.length === 0);
-            if (isEmpty) return;
-            
-            // Abre o modal
-            const modal = document.getElementById('clear-modal');
-            modal.classList.remove('hidden');
-            void modal.offsetWidth;
-            modal.classList.remove('opacity-0');
-            modal.querySelector('div').classList.remove('scale-95');
-        }
-
-        function closeClearModal() {
-            // Fecha o modal
-            const modal = document.getElementById('clear-modal');
-            modal.classList.add('opacity-0');
-            modal.querySelector('div').classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
-
-        function confirmClearItinerary() {
-            // Executa a limpeza
-            itinerary = { dia1: [], dia2: [], dia3: [], dia4: [] };
-            
-            saveData();
-            renderCatalog();
-            renderAllDays();
-            closeClearModal();
-            showToast('O roteiro foi limpo.', 'error');
-            switchTab('catalogo');
-        }
-
-        function generateRandomItinerary() {
-            itinerary = { dia1: [], dia2: [], dia3: [], dia4: [] };
-
-            function shuffleArray(array) {
-                let shuffled = [...array];
-                for (let i = shuffled.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-                }
-                return shuffled;
-            }
-
-            const isLunch = (s) => s.time === 'Almoço';
-            const isDinner = (s) => s.time === 'Jantar';
-            const isActivity = (s) => !isLunch(s) && !isDinner(s);
-
-            let allLunchSpots = allSpots.filter(isLunch);
-            let allDinnerSpots = allSpots.filter(isDinner);
-            let activitySpots = shuffleArray(allSpots.filter(isActivity));
-
-            const totalDays = ['dia1', 'dia2', 'dia3', 'dia4'];
-
-            const getWeight = (time) => {
-                const t = time.toLowerCase();
-                if (t.includes('manhã')) return 1;
-                if (t.includes('dia inteiro')) return 1;
-                if (t.includes('almoço')) return 2;
-                if (t.includes('tarde')) return 3;
-                if (t.includes('fim de tarde')) return 4;
-                if (t.includes('noite')) return 5;
-                if (t.includes('jantar')) return 6;
-                return 10;
+            // Mostrar Toast helper
+            const showToastMessage = (message, type = 'success') => {
+                setToast({ show: true, message, type });
+                setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
             };
 
-            totalDays.forEach(day => {
-                const act = activitySpots.pop();
-                const lun = allLunchSpots[Math.floor(Math.random() * allLunchSpots.length)];
-                const din = allDinnerSpots[Math.floor(Math.random() * allDinnerSpots.length)];
+            // Adicionar Passeio
+            const addToDay = (spotId, dayId) => {
+                if (itinerary[dayId].some(s => s.id === spotId)) return;
                 
-                let dayItems = [act, lun, din].filter(Boolean);
-                dayItems.sort((a, b) => getWeight(a.time) - getWeight(b.time));
-                itinerary[day].push(...dayItems);
-            });
-
-            saveData();
-            renderCatalog();
-            renderAllDays();
-            switchTab('dia1');
-            showToast('Roteiro mágico gerado com sucesso!');
-            
-            document.getElementById('planeador').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // Lógica do Mapa
-        let leafletMap = null;
-        let spotMarker = null;
-        let userMarker = null;
-
-        function openMapModal(spotId) {
-            const spot = allSpots.find(s => s.id === spotId);
-            if (!spot) return;
-
-            document.getElementById('modal-img').src = spot.img;
-            document.getElementById('modal-title').innerText = spot.title;
-            document.getElementById('modal-desc').innerText = spot.desc;
-
-            const modal = document.getElementById('map-modal');
-            modal.classList.remove('hidden');
-            void modal.offsetWidth;
-            modal.classList.remove('opacity-0');
-            modal.querySelector('div').classList.remove('scale-95');
-
-            setTimeout(() => {
-                if (!leafletMap) {
-                    leafletMap = L.map('map-container').setView([spot.lat, spot.lng], 13);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    }).addTo(leafletMap);
-                } else {
-                    leafletMap.setView([spot.lat, spot.lng], 13);
-                    leafletMap.invalidateSize();
-                }
-
-                if (spotMarker) leafletMap.removeLayer(spotMarker);
-                if (userMarker) leafletMap.removeLayer(userMarker);
-
-                spotMarker = L.marker([spot.lat, spot.lng]).addTo(leafletMap)
-                    .bindPopup(`<b>${spot.title}</b><br>O seu destino.`)
-                    .openPopup();
-
-                if ("geolocation" in navigator) {
-                    navigator.geolocation.getCurrentPosition(position => {
-                        const userLat = position.coords.latitude;
-                        const userLng = position.coords.longitude;
-                        
-                        const userIcon = L.divIcon({
-                            className: 'custom-user-icon',
-                            html: '<div style="background-color: #3b82f6; width: 14px; height: 14px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></div>',
-                            iconSize: [14, 14],
-                            iconAnchor: [7, 7]
-                        });
-
-                        userMarker = L.marker([userLat, userLng], {icon: userIcon}).addTo(leafletMap)
-                            .bindPopup('<b>Você</b><br>A sua localização atual.');
-
-                        const bounds = L.latLngBounds([
-                            [spot.lat, spot.lng],
-                            [userLat, userLng]
-                        ]);
-                        leafletMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
-                    }, err => {
-                        console.log("Acesso à localização do utilizador bloqueado ou indisponível.");
+                const spot = allSpots.find(s => s.id === spotId);
+                if (spot) {
+                    setItinerary(prev => {
+                        const newDayList = [...prev[dayId], { ...spot }];
+                        newDayList.sort((a, b) => getWeight(a.time) - getWeight(b.time));
+                        return { ...prev, [dayId]: newDayList };
                     });
+                    const numeroDia = dayId.replace('dia', '');
+                    showToastMessage(`Adicionado ao Dia ${numeroDia}!`);
                 }
-            }, 300);
-        }
+            };
 
-        function closeMapModal() {
-            const modal = document.getElementById('map-modal');
-            modal.classList.add('opacity-0');
-            modal.querySelector('div').classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
+            // Remover Passeio
+            const removeFromDay = (spotId, dayId) => {
+                setItinerary(prev => {
+                    const newDayList = prev[dayId].filter(s => s.id !== spotId);
+                    return { ...prev, [dayId]: newDayList };
+                });
+                showToastMessage('Removido do roteiro.', 'error');
+            };
+
+            // Confirmar Limpeza
+            const confirmClearItinerary = () => {
+                setItinerary({ dia1: [], dia2: [], dia3: [], dia4: [] });
+                setClearModalOpen(false);
+                showToastMessage('O roteiro foi limpo.', 'error');
+                setActiveTab('catalogo');
+            };
+
+            // Sortear Aleatório
+            const generateRandomItinerary = () => {
+                const isLunch = (s) => s.time === 'Almoço';
+                const isDinner = (s) => s.time === 'Jantar';
+                const isActivity = (s) => !isLunch(s) && !isDinner(s);
+
+                let allLunchSpots = allSpots.filter(isLunch);
+                let allDinnerSpots = allSpots.filter(isDinner);
+                
+                let activitySpots = [...allSpots.filter(isActivity)].sort(() => Math.random() - 0.5); // Shuffle
+                
+                const totalDays = ['dia1', 'dia2', 'dia3', 'dia4'];
+                let newItinerary = { dia1: [], dia2: [], dia3: [], dia4: [] };
+
+                totalDays.forEach(day => {
+                    const act = activitySpots.pop();
+                    const lun = allLunchSpots[Math.floor(Math.random() * allLunchSpots.length)];
+                    const din = allDinnerSpots[Math.floor(Math.random() * allDinnerSpots.length)];
+                    
+                    let dayItems = [act, lun, din].filter(Boolean);
+                    dayItems.sort((a, b) => getWeight(a.time) - getWeight(b.time));
+                    newItinerary[day].push(...dayItems);
+                });
+
+                setItinerary(newItinerary);
+                setActiveTab('dia1');
+                showToastMessage('Roteiro mágico gerado com sucesso!');
+                document.getElementById('planeador').scrollIntoView({ behavior: 'smooth' });
+            };
+
+            // --- Lógica do PWA ---
+            useEffect(() => {
+                const handler = (e) => {
+                    e.preventDefault();
+                    if (!localStorage.getItem('pwaMaceioDismissed')) {
+                        setPwaBanner(prev => ({ ...prev, show: true, deferredPrompt: e }));
+                    }
+                };
+                window.addEventListener('beforeinstallprompt', handler);
+
+                // Checar standalone após 3 segs
+                const timer = setTimeout(() => {
+                    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+                    if (!isStandalone && !localStorage.getItem('pwaMaceioDismissed')) {
+                        setPwaBanner(prev => ({ ...prev, show: true }));
+                    }
+                }, 3000);
+
+                return () => {
+                    window.removeEventListener('beforeinstallprompt', handler);
+                    clearTimeout(timer);
+                };
+            }, []);
+
+            const dismissPWA = () => {
+                setPwaBanner(prev => ({ ...prev, show: false }));
+                localStorage.setItem('pwaMaceioDismissed', 'true');
+            };
+
+            const handleInstall = async () => {
+                if (pwaBanner.deferredPrompt) {
+                    pwaBanner.deferredPrompt.prompt();
+                    const { outcome } = await pwaBanner.deferredPrompt.userChoice;
+                    if (outcome === 'accepted') dismissPWA();
+                    setPwaBanner(prev => ({ ...prev, deferredPrompt: null }));
+                } else {
+                    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+                    setPwaBanner(prev => ({ ...prev, mode: isIos ? 'ios' : 'android' }));
+                }
+            };
+
+            return (
+                <div className="flex flex-col min-h-screen">
+                    {/* Header */}
+                    <header className="hero-bg h-[50vh] md:h-[60vh] flex items-center justify-center relative overflow-hidden">
+                        <div className="text-center text-white px-4 z-10 w-full max-w-4xl">
+                            <div className="inline-block mb-4 px-5 py-2 rounded-full border border-white/30 backdrop-blur-md bg-white/10 shadow-lg">
+                                <span className="uppercase tracking-[0.2em] md:tracking-[0.3em] text-xs md:text-sm font-semibold text-sand">Personalize a sua Viagem</span>
+                            </div>
+                            <h1 className="font-serif text-5xl md:text-7xl font-bold mb-2 text-shadow-lg leading-tight">Maceió <br/><span className="text-3xl md:text-5xl text-ocean-light italic block mt-2">O Seu Roteiro Perfeito</span></h1>
+                        </div>
+                        <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20">
+                            <svg className="relative block w-full h-[40px] md:h-[100px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.08,130.83,123.63,192.27,108.86,236.4,98.66,280.4,76.51,321.39,56.44Z" fill="url(#wave-gradient)"></path>
+                                <defs>
+                                    <linearGradient id="wave-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stopColor="#f8fafc" />
+                                        <stop offset="100%" stopColor="#e0f2fe" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                    </header>
+
+                    {/* Main Content */}
+                    <main id="planeador" className="container mx-auto px-4 py-8 md:py-16 max-w-6xl relative z-30 flex-grow">
+                        
+                        {/* Navigation Tabs */}
+                        <div className="relative bg-white/60 backdrop-blur-md border-b border-slate-200 py-3 px-4 -mx-4 md:px-8 md:-mx-8 mb-8 md:mb-12 flex flex-wrap justify-center gap-2 md:gap-3 items-center transition-all">
+                            <button onClick={() => setActiveTab('catalogo')} className={`tab-btn glass-tab px-4 py-2 md:px-6 md:py-3 rounded-full font-medium text-sm md:text-base transition-all duration-300 flex items-center gap-2 shadow-sm ${activeTab === 'catalogo' ? 'tab-active' : 'text-slate-700'}`}>
+                                <i className="fas fa-map-marked-alt text-base md:text-lg"></i> <span className="hidden sm:inline">Pontos Turísticos</span><span className="sm:hidden">Catálogo</span>
+                            </button>
+                            {['dia1', 'dia2', 'dia3', 'dia4'].map(day => (
+                                <button key={day} onClick={() => setActiveTab(day)} className={`tab-btn glass-tab px-4 py-2 md:px-6 md:py-3 rounded-full font-medium text-sm md:text-base transition-all duration-300 flex items-center gap-2 shadow-sm ${activeTab === day ? 'tab-active' : 'text-slate-700'}`}>
+                                    Dia {day.replace('dia', '')} 
+                                    {itinerary[day].length > 0 && (
+                                        <span className={`text-[10px] md:text-xs px-2 py-0.5 rounded-full ${activeTab === day ? 'bg-white text-ocean' : 'bg-ocean text-white'}`}>{itinerary[day].length}</span>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Content Area */}
+                        <div className="relative min-h-[400px] md:min-h-[500px]">
+                            
+                            {/* Catalog View */}
+                            {activeTab === 'catalogo' && (
+                                <div className="fade-in">
+                                    <div className="flex flex-col lg:flex-row justify-between items-center mb-8 md:mb-10 bg-white/60 backdrop-blur-md p-5 md:p-6 rounded-3xl border border-white shadow-sm gap-5 md:gap-6">
+                                        <div className="text-center lg:text-left">
+                                            <h2 className="text-2xl md:text-3xl font-serif font-bold text-slate-800">Escolha os seus Passeios</h2>
+                                            <p className="text-slate-500 text-sm md:text-base mt-1 md:mt-2">Adicione os locais aos dias desejados.</p>
+                                        </div>
+                                        <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                                            <button onClick={() => {
+                                                const isEmpty = Object.values(itinerary).every(day => day.length === 0);
+                                                if (!isEmpty) setClearModalOpen(true);
+                                            }} className="flex-1 lg:flex-none inline-flex justify-center items-center gap-2 bg-white text-red-500 border border-red-100 font-medium py-2.5 md:py-3 px-6 rounded-full hover:bg-red-50 hover:border-red-200 transition-all duration-300 shadow-sm transform hover:-translate-y-1 text-sm md:text-base">
+                                                <i className="fas fa-trash-alt"></i> Limpar Tudo
+                                            </button>
+                                            <button onClick={generateRandomItinerary} className="flex-1 lg:flex-none inline-flex justify-center items-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold py-2.5 md:py-3 px-6 rounded-full hover:from-purple-400 hover:to-indigo-500 transition-all duration-300 shadow-[0_8px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_12px_20px_rgba(99,102,241,0.4)] transform hover:-translate-y-1 text-sm md:text-base">
+                                                <i className="fas fa-magic"></i> Estou com Sorte!
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                                        {allSpots.map(spot => (
+                                            <div key={spot.id} className="bg-white rounded-2xl md:rounded-3xl shadow-xl hover:shadow-2xl overflow-hidden card-hover border border-white flex flex-col h-full fade-in">
+                                                <div className="relative h-44 md:h-48 overflow-hidden group">
+                                                    <img src={spot.img} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" alt={spot.title} />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                                                    <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-[10px] md:text-xs font-bold text-slate-700 shadow-md flex items-center gap-1">
+                                                        <i className="far fa-clock"></i> {spot.time}
+                                                    </div>
+                                                    <button onClick={() => setMapModal({ show: true, spot })} title="Ver no Mapa" className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-ocean hover:text-white w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center hover:bg-ocean transition-colors shadow-lg z-20">
+                                                        <i className="fas fa-map-marker-alt text-sm md:text-base"></i>
+                                                    </button>
+                                                    <h3 className="absolute bottom-3 left-4 right-4 text-lg md:text-xl font-bold text-white text-shadow-sm leading-tight pr-10 md:pr-12">{spot.title}</h3>
+                                                </div>
+                                                <div className="p-4 md:p-5 flex-grow flex flex-col justify-between bg-white">
+                                                    <p className="text-slate-500 text-xs md:text-sm mb-4 md:mb-5 line-clamp-3">{spot.desc}</p>
+                                                    <div className="mt-auto">
+                                                        <p className="text-[10px] md:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 md:mb-3 text-center">Gestão no Roteiro:</p>
+                                                        <div className="grid grid-cols-4 md:grid-cols-2 gap-1.5 md:gap-2">
+                                                            {['dia1', 'dia2', 'dia3', 'dia4'].map(day => {
+                                                                const isAdded = itinerary[day].some(s => s.id === spot.id);
+                                                                const dayNum = day.replace('dia', '');
+                                                                
+                                                                if (isAdded) {
+                                                                    return (
+                                                                        <button key={day} onClick={() => removeFromDay(spot.id, day)} className="bg-emerald-500 text-white border border-transparent text-xs md:text-sm py-2 rounded-lg md:rounded-xl font-medium flex items-center justify-center md:gap-1.5 shadow-sm hover:bg-red-500 transition-colors group" title={`Remover do Dia ${dayNum}`}>
+                                                                            <span className="md:hidden group-hover:hidden"><i className="fas fa-check"></i></span>
+                                                                            <span className="md:hidden hidden group-hover:inline"><i className="fas fa-times"></i></span>
+                                                                            <span className="hidden md:inline group-hover:hidden"><i className="fas fa-check text-xs"></i> Dia {dayNum}</span>
+                                                                            <span className="hidden group-hover:md:inline"><i className="fas fa-times text-xs"></i> Remover</span>
+                                                                        </button>
+                                                                    );
+                                                                } else {
+                                                                    return (
+                                                                        <button key={day} onClick={() => addToDay(spot.id, day)} className="bg-slate-50 hover:bg-ocean hover:text-white border border-slate-100 hover:border-transparent text-slate-700 text-xs md:text-sm py-2 rounded-lg md:rounded-xl transition-all font-medium flex items-center justify-center md:gap-1.5 shadow-sm">
+                                                                            <span className="md:hidden">D{dayNum}</span>
+                                                                            <span className="hidden md:inline"><i className="fas fa-calendar-day text-xs"></i> Dia {dayNum}</span>
+                                                                        </button>
+                                                                    );
+                                                                }
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Days Views */}
+                            {['dia1', 'dia2', 'dia3', 'dia4'].map(day => (
+                                activeTab === day && (
+                                    <div key={day} className="fade-in relative timeline-container pb-8 md:pb-12">
+                                        <div className="text-center mb-10 md:mb-16">
+                                            <h2 className="text-3xl md:text-4xl font-serif font-bold text-slate-800">Roteiro: Dia {day.replace('dia', '')}</h2>
+                                            <div className="w-16 md:w-20 h-1 bg-gradient-to-r from-ocean-light to-ocean mx-auto mt-3 md:mt-4 rounded-full"></div>
+                                        </div>
+                                        
+                                        {itinerary[day].length === 0 ? (
+                                            <div className="text-center py-12 md:py-16 bg-white/50 rounded-2xl md:rounded-3xl border border-dashed border-slate-300 max-w-2xl mx-auto shadow-sm">
+                                                <i className="fas fa-map-signs text-4xl md:text-5xl text-slate-300 mb-3 md:mb-4"></i>
+                                                <h3 className="text-lg md:text-xl font-bold text-slate-600">Dia Livre</h3>
+                                                <p className="text-slate-500 mb-5 md:mb-6 text-xs md:text-sm">Ainda não programou passeios para este dia.</p>
+                                                <button onClick={() => setActiveTab('catalogo')} className="inline-flex items-center gap-2 bg-white border border-slate-200 text-slate-700 font-medium py-2 px-5 md:px-6 rounded-full hover:border-ocean hover:text-ocean transition-colors shadow-sm text-sm md:text-base">
+                                                    <i className="fas fa-plus"></i> Adicionar
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            itinerary[day].map((spot, index) => (
+                                                <div key={spot.id + index} className="timeline-item relative mb-10 md:mb-16 w-full flex justify-end md:justify-center items-center pl-14 md:pl-0 fade-in" style={{animationDelay: `${index * 0.1}s`}}>
+                                                    <div className={`timeline-dot absolute left-6 md:left-1/2 w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br ${spot.color} rounded-full border-[3px] md:border-4 border-white shadow-lg z-10 transform -translate-x-1/2 flex items-center justify-center text-white transition-transform duration-300`}>
+                                                        <i className={`fas ${spot.icon} text-sm md:text-base`}></i>
+                                                    </div>
+                                                    
+                                                    <div className={`timeline-content w-full md:w-[45%] ${index % 2 === 0 ? 'md:mr-auto' : 'md:ml-auto'} bg-white rounded-2xl md:rounded-3xl shadow-xl hover:shadow-2xl overflow-hidden card-hover border border-white relative group`}>
+                                                        <div className={`absolute -right-4 -top-4 md:-right-6 md:-top-6 text-slate-50 opacity-40 text-7xl md:text-9xl pointer-events-none transform group-hover:rotate-12 transition-transform duration-500`}><i className={`fas ${spot.icon}`}></i></div>
+                                                        
+                                                        <div className="relative h-44 md:h-56 overflow-hidden">
+                                                            <img src={spot.img} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" alt={spot.title}/>
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                                                            <div className="absolute top-3 left-3 md:top-4 md:left-4 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-[10px] md:text-xs font-bold text-slate-700 shadow-lg flex items-center gap-1">
+                                                                <i className="far fa-clock"></i> {spot.time}
+                                                            </div>
+                                                            <div className="absolute top-3 right-3 md:top-4 md:right-4 flex gap-1.5 md:gap-2 z-20">
+                                                                <button onClick={() => setMapModal({ show: true, spot })} title="Ver no Mapa" className="bg-white/90 backdrop-blur-sm text-ocean hover:text-white w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center hover:bg-ocean transition-colors shadow-lg">
+                                                                    <i className="fas fa-map-marker-alt text-sm md:text-base"></i>
+                                                                </button>
+                                                                <button onClick={() => removeFromDay(spot.id, day)} title="Remover" className="bg-white/90 backdrop-blur-sm text-red-500 hover:text-white w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center hover:bg-red-500 transition-colors shadow-lg">
+                                                                    <i className="fas fa-times text-sm md:text-base"></i>
+                                                                </button>
+                                                            </div>
+                                                            <h3 className="absolute bottom-3 left-4 right-4 md:bottom-4 md:left-5 md:right-5 text-lg md:text-2xl font-bold text-white text-shadow-sm leading-tight pr-20">{spot.title}</h3>
+                                                        </div>
+                                                        <div className="p-4 md:p-6 relative z-10 bg-white">
+                                                            <p className="text-slate-600 text-xs md:text-sm leading-relaxed">{spot.desc}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                )
+                            ))}
+                        </div>
+                    </main>
+
+                    <footer className="bg-slate-900 text-slate-400 py-8 md:py-10 text-center mt-8 md:mt-12 border-t border-slate-800 text-sm md:text-base">
+                        <p className="font-light tracking-wide px-4">Desenvolvido com <i className="fas fa-heart text-coral mx-1 animate-pulse"></i> para a sua viagem a Maceió.</p>
+                    </footer>
+
+                    {/* Toast */}
+                    <div className={`toast ${toast.show ? 'show' : ''} ${toast.type === 'error' ? 'error' : ''}`}>
+                        <i className={`fas ${toast.type === 'error' ? 'fa-trash-alt' : 'fa-check-circle'} text-lg`}></i>
+                        <span>{toast.message}</span>
+                    </div>
+
+                    {/* Clear Modal */}
+                    {clearModalOpen && (
+                        <div className="fixed inset-0 z-[600] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
+                            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+                                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i className="fas fa-trash-alt text-2xl text-red-500"></i>
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-800 mb-2">Limpar Roteiro?</h3>
+                                <p className="text-slate-500 text-sm mb-6">Esta ação irá remover todos os passeios já planeados nos dias. Esta ação não poderá ser desfeita.</p>
+                                <div className="flex gap-3">
+                                    <button onClick={() => setClearModalOpen(false)} className="flex-1 bg-slate-100 text-slate-700 font-semibold py-2.5 rounded-xl hover:bg-slate-200 transition-colors">Cancelar</button>
+                                    <button onClick={confirmClearItinerary} className="flex-1 bg-red-500 text-white font-semibold py-2.5 rounded-xl hover:bg-red-600 transition-colors shadow-md shadow-red-500/30">Sim, Limpar</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Map Modal */}
+                    <MapModal config={mapModal} onClose={() => setMapModal({ show: false, spot: null })} />
+
+                    {/* PWA Banner */}
+                    {pwaBanner.show && (
+                        <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-[350px] bg-white rounded-2xl shadow-2xl z-[500] flex flex-col overflow-hidden border border-slate-100 fade-in">
+                            <div className="bg-gradient-to-r from-ocean to-ocean-dark p-4 flex justify-between items-center text-white">
+                                <div className="flex items-center gap-3">
+                                    <div className="bg-white/20 w-10 h-10 flex items-center justify-center rounded-xl backdrop-blur-sm"><i className="fas fa-plane-departure text-xl"></i></div>
+                                    <div>
+                                        <h4 className="font-bold text-sm">Instalar Planeador</h4>
+                                        <p className="text-[10px] text-white/80">Acesso rápido no seu ecrã inicial</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-4 bg-white flex justify-end gap-3">
+                                <button onClick={dismissPWA} className="text-slate-500 hover:text-slate-700 font-medium px-3 py-1.5 text-xs transition-colors rounded-lg">Mais Tarde</button>
+                                {pwaBanner.mode === null && (
+                                    <button onClick={handleInstall} className="bg-ocean hover:bg-ocean-dark text-white font-bold px-5 py-2 rounded-xl text-xs shadow-md transition-colors flex items-center gap-2">
+                                        <i className="fas fa-download"></i> Instalar App
+                                    </button>
+                                )}
+                            </div>
+                            
+                            {pwaBanner.mode === 'ios' && (
+                                <div className="p-4 bg-slate-50 text-xs text-slate-600 border-t border-slate-100 leading-relaxed text-center fade-in">
+                                    <p>Para instalar no iPhone/iPad: <br/>Toque no ícone <i className="fas fa-share-square text-ocean mx-1 text-base"></i> <strong>Partilhar</strong> na barra do navegador e selecione <br/><strong>"Adicionar ao Ecrã Principal"</strong>.</p>
+                                </div>
+                            )}
+                            
+                            {pwaBanner.mode === 'android' && (
+                                <div className="p-4 bg-slate-50 text-xs text-slate-600 border-t border-slate-100 leading-relaxed text-center fade-in">
+                                    <p>Para instalar no Android: <br/>Toque no menu <i className="fas fa-ellipsis-v text-ocean mx-1 text-base"></i> (três pontos) no canto superior direito e selecione <br/><strong>"Adicionar ao Ecrã Principal"</strong> ou <strong>"Instalar Aplicação"</strong>.</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Componente do Mapa Isolado
+        const MapModal = ({ config, onClose }) => {
+            const mapRef = useRef(null);
+            const mapInstanceRef = useRef(null);
+            const markerRef = useRef(null);
+            const userMarkerRef = useRef(null);
+
+            useEffect(() => {
+                if (config.show && config.spot && mapRef.current) {
+                    if (!mapInstanceRef.current) {
+                        mapInstanceRef.current = L.map(mapRef.current).setView([config.spot.lat, config.spot.lng], 13);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '&copy; OpenStreetMap'
+                        }).addTo(mapInstanceRef.current);
+                    } else {
+                        mapInstanceRef.current.setView([config.spot.lat, config.spot.lng], 13);
+                        mapInstanceRef.current.invalidateSize();
+                    }
+
+                    if (markerRef.current) mapInstanceRef.current.removeLayer(markerRef.current);
+                    if (userMarkerRef.current) mapInstanceRef.current.removeLayer(userMarkerRef.current);
+
+                    markerRef.current = L.marker([config.spot.lat, config.spot.lng])
+                        .addTo(mapInstanceRef.current)
+                        .bindPopup(`<b>${config.spot.title}</b><br>O seu destino.`)
+                        .openPopup();
+
+                    if ("geolocation" in navigator) {
+                        navigator.geolocation.getCurrentPosition(position => {
+                            const userLat = position.coords.latitude;
+                            const userLng = position.coords.longitude;
+                            
+                            const userIcon = L.divIcon({
+                                className: 'custom-user-icon',
+                                html: '<div style="background-color: #3b82f6; width: 14px; height: 14px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></div>',
+                                iconSize: [14, 14],
+                                iconAnchor: [7, 7]
+                            });
+
+                            userMarkerRef.current = L.marker([userLat, userLng], {icon: userIcon})
+                                .addTo(mapInstanceRef.current)
+                                .bindPopup('<b>Você</b><br>A sua localização atual.');
+
+                            const bounds = L.latLngBounds([
+                                [config.spot.lat, config.spot.lng],
+                                [userLat, userLng]
+                            ]);
+                            mapInstanceRef.current.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+                        }, err => {
+                            console.log("Localização indisponível.");
+                        });
+                    }
+                }
+            }, [config]);
+
+            if (!config.show || !config.spot) return null;
+
+            return (
+                <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 fade-in">
+                    <div className="bg-white rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col md:flex-row h-[90vh] md:h-[75vh] relative">
+                        <button onClick={onClose} className="absolute top-3 right-3 md:top-4 md:right-4 z-[400] bg-white text-slate-700 hover:text-red-500 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-lg transition-colors border border-slate-100">
+                            <i className="fas fa-times md:text-lg"></i>
+                        </button>
+                        <div className="w-full md:w-1/3 h-40 md:h-full relative flex-shrink-0">
+                            <img src={config.spot.img} className="w-full h-full object-cover" alt="Local" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 md:via-black/30 to-transparent"></div>
+                            <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 text-white">
+                                <h3 className="text-xl md:text-2xl font-bold mb-1 md:mb-2 text-shadow-sm leading-tight pr-8">{config.spot.title}</h3>
+                                <p className="text-xs md:text-sm opacity-90 leading-relaxed hidden sm:block">{config.spot.desc}</p>
+                            </div>
+                        </div>
+                        <div className="w-full md:w-2/3 h-full relative z-10 bg-slate-100" ref={mapRef}>
+                            {/* Leaflet será renderizado aqui */}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Renderizar a App
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
