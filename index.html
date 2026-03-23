@@ -231,6 +231,7 @@
             // Estado para os Modais e Toasts
             const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
             const [clearModalOpen, setClearModalOpen] = useState(false);
+            const [removeModal, setRemoveModal] = useState({ show: false, spotId: null, dayId: null });
             const [mapModal, setMapModal] = useState({ show: false, spot: null });
 
             // Estado para PWA Banner
@@ -263,12 +264,19 @@
                 }
             };
 
-            // Remover Passeio
-            const removeFromDay = (spotId, dayId) => {
+            // Remover Passeio (Solicitação)
+            const requestRemoveFromDay = (spotId, dayId) => {
+                setRemoveModal({ show: true, spotId, dayId });
+            };
+
+            // Remover Passeio (Confirmação)
+            const confirmRemoveFromDay = () => {
+                const { spotId, dayId } = removeModal;
                 setItinerary(prev => {
                     const newDayList = prev[dayId].filter(s => s.id !== spotId);
                     return { ...prev, [dayId]: newDayList };
                 });
+                setRemoveModal({ show: false, spotId: null, dayId: null });
                 showToastMessage('Removido do roteiro.', 'error');
             };
 
@@ -441,11 +449,9 @@
                                                                 
                                                                 if (isAdded) {
                                                                     return (
-                                                                        <button key={day} onClick={() => removeFromDay(spot.id, day)} className="bg-emerald-500 text-white border border-transparent text-xs md:text-sm py-2 rounded-lg md:rounded-xl font-medium flex items-center justify-center md:gap-1.5 shadow-sm hover:bg-red-500 transition-colors group" title={`Remover do Dia ${dayNum}`}>
-                                                                            <span className="md:hidden group-hover:hidden"><i className="fas fa-check"></i></span>
-                                                                            <span className="md:hidden hidden group-hover:inline"><i className="fas fa-times"></i></span>
-                                                                            <span className="hidden md:inline group-hover:hidden"><i className="fas fa-check text-xs"></i> Dia {dayNum}</span>
-                                                                            <span className="hidden group-hover:md:inline"><i className="fas fa-times text-xs"></i> Remover</span>
+                                                                        <button key={day} onClick={() => requestRemoveFromDay(spot.id, day)} className="bg-emerald-500 hover:bg-emerald-600 text-white border border-transparent text-xs md:text-sm py-2 rounded-lg md:rounded-xl transition-all font-medium flex items-center justify-center md:gap-1.5 shadow-sm" title={`Remover do Dia ${dayNum}`}>
+                                                                            <span className="md:hidden"><i className="fas fa-check"></i></span>
+                                                                            <span className="hidden md:inline"><i className="fas fa-check text-xs"></i> Dia {dayNum}</span>
                                                                         </button>
                                                                     );
                                                                 } else {
@@ -504,7 +510,7 @@
                                                                 <button onClick={() => setMapModal({ show: true, spot })} title="Ver no Mapa" className="bg-white/90 backdrop-blur-sm text-ocean hover:text-white w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center hover:bg-ocean transition-colors shadow-lg">
                                                                     <i className="fas fa-map-marker-alt text-sm md:text-base"></i>
                                                                 </button>
-                                                                <button onClick={() => removeFromDay(spot.id, day)} title="Remover" className="bg-white/90 backdrop-blur-sm text-red-500 hover:text-white w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center hover:bg-red-500 transition-colors shadow-lg">
+                                                                <button onClick={() => requestRemoveFromDay(spot.id, day)} title="Remover" className="bg-white/90 backdrop-blur-sm text-red-500 hover:text-white w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center hover:bg-red-500 transition-colors shadow-lg">
                                                                     <i className="fas fa-times text-sm md:text-base"></i>
                                                                 </button>
                                                             </div>
@@ -545,6 +551,23 @@
                                 <div className="flex gap-3">
                                     <button onClick={() => setClearModalOpen(false)} className="flex-1 bg-slate-100 text-slate-700 font-semibold py-2.5 rounded-xl hover:bg-slate-200 transition-colors">Cancelar</button>
                                     <button onClick={confirmClearItinerary} className="flex-1 bg-red-500 text-white font-semibold py-2.5 rounded-xl hover:bg-red-600 transition-colors shadow-md shadow-red-500/30">Sim, Limpar</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Remove Item Modal */}
+                    {removeModal.show && (
+                        <div className="fixed inset-0 z-[600] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
+                            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+                                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i className="fas fa-times text-2xl text-red-500"></i>
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-800 mb-2">Remover Passeio?</h3>
+                                <p className="text-slate-500 text-sm mb-6">Deseja remover este passeio do Dia {removeModal.dayId?.replace('dia', '')}?</p>
+                                <div className="flex gap-3">
+                                    <button onClick={() => setRemoveModal({ show: false, spotId: null, dayId: null })} className="flex-1 bg-slate-100 text-slate-700 font-semibold py-2.5 rounded-xl hover:bg-slate-200 transition-colors">Cancelar</button>
+                                    <button onClick={confirmRemoveFromDay} className="flex-1 bg-red-500 text-white font-semibold py-2.5 rounded-xl hover:bg-red-600 transition-colors shadow-md shadow-red-500/30">Sim, Remover</button>
                                 </div>
                             </div>
                         </div>
@@ -594,27 +617,20 @@
         // Componente do Mapa Isolado
         const MapModal = ({ config, onClose }) => {
             const mapRef = useRef(null);
-            const mapInstanceRef = useRef(null);
-            const markerRef = useRef(null);
-            const userMarkerRef = useRef(null);
 
             useEffect(() => {
+                let mapInstance = null;
+
                 if (config.show && config.spot && mapRef.current) {
-                    if (!mapInstanceRef.current) {
-                        mapInstanceRef.current = L.map(mapRef.current).setView([config.spot.lat, config.spot.lng], 13);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '&copy; OpenStreetMap'
-                        }).addTo(mapInstanceRef.current);
-                    } else {
-                        mapInstanceRef.current.setView([config.spot.lat, config.spot.lng], 13);
-                        mapInstanceRef.current.invalidateSize();
-                    }
+                    // Inicializa o mapa com o novo elemento DOM
+                    mapInstance = L.map(mapRef.current).setView([config.spot.lat, config.spot.lng], 16);
+                    
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap'
+                    }).addTo(mapInstance);
 
-                    if (markerRef.current) mapInstanceRef.current.removeLayer(markerRef.current);
-                    if (userMarkerRef.current) mapInstanceRef.current.removeLayer(userMarkerRef.current);
-
-                    markerRef.current = L.marker([config.spot.lat, config.spot.lng])
-                        .addTo(mapInstanceRef.current)
+                    L.marker([config.spot.lat, config.spot.lng])
+                        .addTo(mapInstance)
                         .bindPopup(`<b>${config.spot.title}</b><br>O seu destino.`)
                         .openPopup();
 
@@ -630,19 +646,27 @@
                                 iconAnchor: [7, 7]
                             });
 
-                            userMarkerRef.current = L.marker([userLat, userLng], {icon: userIcon})
-                                .addTo(mapInstanceRef.current)
+                            L.marker([userLat, userLng], {icon: userIcon})
+                                .addTo(mapInstance)
                                 .bindPopup('<b>Você</b><br>A sua localização atual.');
-
-                            const bounds = L.latLngBounds([
-                                [config.spot.lat, config.spot.lng],
-                                [userLat, userLng]
-                            ]);
-                            mapInstanceRef.current.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
                         }, err => {
                             console.log("Localização indisponível.");
                         });
                     }
+
+                    // Força o recálculo do tamanho do mapa após a animação do modal terminar para evitar fundo cinzento
+                    const timerAnim = setTimeout(() => {
+                        if (mapInstance) {
+                            mapInstance.invalidateSize();
+                        }
+                    }, 400);
+
+                    return () => {
+                        clearTimeout(timerAnim);
+                        if (mapInstance) {
+                            mapInstance.remove(); // Limpa a instância do Leaflet corretamente ao fechar
+                        }
+                    };
                 }
             }, [config]);
 
