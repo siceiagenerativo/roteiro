@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planeador Maceió - Crie o seu Roteiro</title>
     
+    <!-- PWA & WebApp Tags (Permite instalar a app no telemóvel) -->
+    <meta name="theme-color" content="#00b4d8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Roteiro Maceió">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+    
+    <!-- Manifesto Embutido (Data URI) -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Planeador%20Macei%C3%B3%22%2C%22short_name%22%3A%22Roteiro%20Macei%C3%B3%22%2C%22description%22%3A%22Crie%20o%20seu%20roteiro%20perfeito%20para%20Macei%C3%B3.%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f8fafc%22%2C%22theme_color%22%3A%22%2300b4d8%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F192%2F3135%2F3135715.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F3135%2F3135715.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
     
@@ -258,6 +269,28 @@
         <span id="toast-message">Adicionado com sucesso!</span>
     </div>
 
+    <!-- Banner de Instalação PWA -->
+    <div id="pwa-install-banner" class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-white rounded-2xl shadow-2xl transform translate-y-40 opacity-0 transition-all duration-500 z-[500] flex flex-col overflow-hidden border border-slate-100 hidden">
+        <div class="bg-gradient-to-r from-ocean to-ocean-dark p-4 flex justify-between items-center text-white">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm"><i class="fas fa-plane-departure text-xl"></i></div>
+                <div>
+                    <h4 class="font-bold text-sm">Instalar Planeador Maceió</h4>
+                    <p class="text-[10px] text-white/80">Acesso rápido e roteiro offline no seu ecrã</p>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 bg-white flex justify-end gap-3">
+            <button onclick="dismissInstallBanner()" class="text-slate-500 hover:text-slate-700 font-medium px-3 py-1.5 text-xs transition-colors rounded-lg">Mais Tarde</button>
+            <button id="pwa-install-btn" class="bg-ocean hover:bg-ocean-dark text-white font-bold px-5 py-1.5 rounded-lg text-xs shadow-md transition-colors flex items-center gap-2">
+                <i class="fas fa-download"></i> Instalar App
+            </button>
+        </div>
+        <div id="ios-instructions" class="hidden p-4 bg-slate-50 text-xs text-slate-600 border-t border-slate-100 leading-relaxed">
+            <p>Para instalar no iPhone/iPad: <br>Toque no ícone <i class="fas fa-share-square text-ocean mx-1"></i> <strong>Partilhar</strong> e depois selecione <strong>"Ecrã Principal"</strong>.</p>
+        </div>
+    </div>
+
     <!-- Modal do Mapa Responsivo -->
     <div id="map-modal" class="fixed inset-0 z-[100] hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-5xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col md:flex-row h-[90vh] md:h-[75vh] relative">
@@ -283,7 +316,79 @@
 
     <!-- LÓGICA DA APLICAÇÃO -->
     <script>
-        // Base de Dados Atualizada com foco na gastronomia e +10 Pontos Turísticos novos
+        // PWA - Lógica de Instalação (Service Worker Invisível e Prompt)
+        let deferredPrompt;
+        const pwaBanner = document.getElementById('pwa-install-banner');
+        const pwaInstallBtn = document.getElementById('pwa-install-btn');
+        const iosInstructions = document.getElementById('ios-instructions');
+
+        // Cria um Service Worker em tempo real (Necessário para o Android permitir a instalação)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swContent = `
+                    self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
+                    self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+                    self.addEventListener('fetch', e => {}); 
+                `;
+                const blob = new Blob([swContent], { type: 'application/javascript' });
+                navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+            });
+        }
+
+        function showInstallBanner() {
+            pwaBanner.classList.remove('hidden');
+            setTimeout(() => {
+                pwaBanner.classList.remove('translate-y-40', 'opacity-0');
+            }, 100);
+        }
+
+        function dismissInstallBanner() {
+            pwaBanner.classList.add('translate-y-40', 'opacity-0');
+            setTimeout(() => {
+                pwaBanner.classList.add('hidden');
+            }, 500);
+            localStorage.setItem('pwaMaceioDismissed', 'true');
+        }
+
+        // Interceta o evento de instalação padrão do Chrome/Android
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            if (!localStorage.getItem('pwaMaceioDismissed')) {
+                showInstallBanner();
+            }
+        });
+
+        // Clique no botão de instalar do nosso banner
+        pwaInstallBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // Android/Chrome: Mostra o aviso nativo
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') dismissInstallBanner();
+                deferredPrompt = null;
+            } else {
+                // Se o utilizador clicar e não houver prompt nativo (ex: iOS), mostramos as instruções
+                pwaInstallBtn.classList.add('hidden');
+                iosInstructions.classList.remove('hidden');
+            }
+        });
+
+        // Deteta se é iPhone/iOS e mostra as instruções por padrão (pois a Apple bloqueia o aviso automático)
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+                const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
+                
+                if (isIos && !isInStandaloneMode && !localStorage.getItem('pwaMaceioDismissed')) {
+                    showInstallBanner();
+                }
+            }, 3000); // Mostra o banner após 3 segundos
+        });
+
+        // =========================================================================
+        // Base de Dados Atualizada com foco na gastronomia e +10 Pontos Turísticos
         const spotsJSON = `[
             { "id": "ponta-verde", "title": "Orla de Ponta Verde", "img": "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&q=80&w=800", "desc": "Caminhada pelo calçadão mais bonito do Brasil. Tire uma foto no letreiro 'Eu Amo Maceió'.", "time": "Manhã", "icon": "fa-sun", "color": "from-amber-300 to-orange-400", "lat": -9.6644, "lng": -35.7051 },
             { "id": "piscinas-paju", "title": "Piscinas Naturais de Pajuçara", "img": "https://images.unsplash.com/photo-1582650517598-a616226db2ba?auto=format&fit=crop&q=80&w=800", "desc": "Embarque numa jangada rústica até às famosas piscinas naturais para nadar com os peixinhos.", "time": "Manhã/Tarde", "icon": "fa-water", "color": "from-ocean-light to-ocean", "lat": -9.6740, "lng": -35.7144 },
