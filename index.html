@@ -167,16 +167,103 @@
 
         // Base de Dados
         const allSpots = [
+{ 
+    id: "domingo-rua-fechada", 
+    title: "Domingo de Rua Fechada", 
+    img: "https://s2-g1.glbimg.com/C9067wJAF9n8n1Ti0YZHJmJLOAc=/0x0:620x403/600x0/smart/filters:gifv():strip_icc()/s.glbimg.com/jo/g1/f/original/2015/09/06/dsc_0773.jpg?auto=format&fit=crop&q=80&w=800", 
+    desc: "Aos domingos, a avenida da orla de Ponta Verde é fechada para veículos, tornando-se um imenso parque ao ar livre ideal para caminhar, pedalar e curtir com a família.", 
+    time: "Domingo (Manhã/Tarde)", 
+    icon: "fa-person-biking", 
+    color: "from-green-400 to-emerald-600", 
+    lat: -9.663833577702095, 
+    lng: -35.70159289376697
+  },
+  { 
+    id: "caminho-moises-maceio", 
+    title: "Caminho de Moisés (Maceió)", 
+    img: "https://www.maragogialagoas.com/wp-content/uploads/2020/07/Caminho-de-Moises-Maragogi.jpg?auto=format&fit=crop&q=80&w=800", 
+    desc: "Famoso banco de areia na Ponta Verde que surge apenas durante a maré baixa. Permite caminhar mar adentro com um visual incrível. Consulte a tábua de maré antes de ir!", 
+    time: "Depende da Maré (Baixa)", 
+    icon: "fa-shoe-prints", 
+    color: "from-cyan-300 to-blue-500", 
+    lat: -9.664139034978952, 
+    lng: -35.699998162413195
+  },
+
+{ 
+    id: "oxe-comidas", 
+    title: "Ôxe Comidas Nordestinas", 
+    img: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2f/cd/51/2d/oxe-comidas-nordestinas.jpg?auto=format&fit=crop&q=80&w=800", 
+    desc: "Delícias da culinária regional nordestina com tempero caseiro e ambiente super acolhedor. Uma ótima pedida para almoço farto.", 
+    time: "Almoço/Jantar", 
+    icon: "fa-bowl-rice", 
+    color: "from-amber-600 to-orange-700", 
+    lat: -9.644226726454098, 
+    lng: -35.70102252501472
+  },
+  { 
+    id: "totem-eu-amo-maceio", 
+    title: "Totem 'Eu Amo Maceió'", 
+    img: "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&q=80&w=800", 
+    desc: "O letreiro turístico mais famoso da cidade, localizado na Praia de Ponta Verde. Parada obrigatória para a clássica foto de recordação.", 
+    time: "Dia Todo", 
+    icon: "fa-heart", 
+    color: "from-red-400 to-red-600", 
+    lat: -9.664382941490326, 
+    lng: -35.69750306199108
+  },
+
+{ 
+    id: "parque-shopping", 
+    title: "Parque Shopping Maceió", 
+    img: "https://assets.multiplan.com.br/Multiplan/filer_public/e3/be/e3bec84e-7f6e-4176-88b8-039e858c0e3a/parqueshoppingsetembro23-54.jpg?auto=format&fit=crop&q=80&w=800", 
+    desc: "O shopping mais moderno e sofisticado da cidade, localizado em Cruz das Almas. Possui lojas exclusivas, uma ótima praça de alimentação e vista para o mar.", 
+    time: "Tarde/Noite", 
+    icon: "fa-store", 
+    color: "from-teal-500 to-teal-700", 
+    lat: -9.627331182469044, 
+    lng: -35.69784435422537
+  },
+  { 
+    id: "maceio-shopping", 
+    title: "Maceió Shopping", 
+    img: "https://www.maceiodicas.com.br/wp-content/uploads/2021/10/maceio_shopping.jpg?auto=format&fit=crop&q=80&w=800", 
+    desc: "O shopping mais tradicional de Maceió, situado no bairro Mangabeiras. Conta com excelente variedade de lojas, serviços, cinemas e restaurantes.", 
+    time: "Tarde/Noite", 
+    icon: "fa-bag-shopping", 
+    color: "from-blue-500 to-indigo-600", 
+    lat: -9.64858152042014, 
+    lng: -35.71506881506309
+  },
+  { 
+    id: "shopping-patio", 
+    title: "Shopping Pátio Maceió", 
+    img: "https://sancoengenharia.com.br/app/uploads/2020/04/shopping-patio-maceio.jpeg?auto=format&fit=crop&q=80&w=800", 
+    desc: "Localizado na parte alta da cidade (Benedito Bentes), é um grande centro de compras popular com diversas opções de varejo, lazer e cinema.", 
+    time: "Tarde/Noite", 
+    icon: "fa-cart-shopping", 
+    color: "from-purple-500 to-purple-700", 
+    lat: -9.558947447705775, 
+    lng: -35.7451588682867
+  },
+
+
+
+
+
+
+
+
   { 
     id: "cadeira-gigante", 
     title: "Cadeira Gigante", 
-    img: "https://images.unsplash.com/photo-1533157579120-21f4568e64c1?auto=format&fit=crop&q=80&w=800", 
+    img: "https://maceio.al.gov.br/transform/imagens/_800x800_crop_center-center_82_none/IMG_3907_2025-11-04-173428_dgcs.jpeg?auto=format&fit=crop&q=80&w=800", 
     desc: "Chegue cedo (antes das 07:00) para evitar filas e tirar fotos divertidas neste ponto instagramável da orla.", 
     time: "Manhã", 
     icon: "fa-camera", 
     color: "from-blue-400 to-blue-600", 
-    lat: -9.6631, 
-    lng: -35.7032 
+    lat: -9.663515127330687, 
+    lng: -35.70130388618087
   },
   { 
     id: "bodega-sertao", 
@@ -186,8 +273,8 @@
     time: "Almoço", 
     icon: "fa-utensils", 
     color: "from-amber-500 to-orange-600", 
-    lat: -9.6468, 
-    lng: -35.7005 
+    lat: -9.663833828906688, 
+    lng: -35.71022171947912
   },
   { 
     id: "marco-dos-corais", 
@@ -197,8 +284,8 @@
     time: "Fim de Tarde", 
     icon: "fa-sun", 
     color: "from-orange-400 to-red-500", 
-    lat: -9.6640, 
-    lng: -35.7045 
+    lat: -9.66582825578035, 
+    lng: -35.69633992819081
   },
   { 
     id: "imperador-camaroes", 
@@ -208,19 +295,19 @@
     time: "Almoço/Jantar", 
     icon: "fa-shrimp", 
     color: "from-red-400 to-red-600", 
-    lat: -9.6685, 
-    lng: -35.7112 
+    lat: -9.665016078907616, 
+    lng: -35.709918857161114
   },
   { 
     id: "piscinas-paju", 
     title: "Piscinas Naturais de Pajuçara", 
-    img: "https://images.unsplash.com/photo-1582650517598-a616226db2ba?auto=format&fit=crop&q=80&w=800", 
+    img: "https://uploads.dicasmaceioemaragogi.com.br/sites/17/2022/05/piscinas-naturais-pajucara.jpeg?auto=format&fit=crop&q=80&w=800", 
     desc: "Passeio de jangada imperdível. Dica: sempre consulte a tábua de maré (o ideal é estar abaixo de 0.5).", 
     time: "Manhã", 
     icon: "fa-water", 
     color: "from-ocean-light to-ocean", 
-    lat: -9.6740, 
-    lng: -35.7144 
+    lat: -9.679415001838851, 
+    lng: -35.710134129063206
   },
   { 
     id: "lopana", 
@@ -230,8 +317,8 @@
     time: "Dia Todo", 
     icon: "fa-umbrella-beach", 
     color: "from-yellow-300 to-orange-400", 
-    lat: -9.6662, 
-    lng: -35.7075 
+    lat: -9.670042045214458, 
+    lng: -35.71509443517549
   },
   { 
     id: "feirinha-pajucara", 
@@ -241,13 +328,13 @@
     time: "Noite", 
     icon: "fa-store", 
     color: "from-indigo-400 to-indigo-600", 
-    lat: -9.6720, 
-    lng: -35.7160 
+    lat: -9.664211600079382, 
+    lng:  -35.70796313013273
   },
   { 
     id: "janga", 
     title: "Janga", 
-    img: "https://images.unsplash.com/photo-1559742811-822873691fc8?auto=format&fit=crop&q=80&w=800", 
+    img: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/24/f6/f8/d5/janga-praia.jpg?auto=format&fit=crop&q=80&w=800", 
     desc: "Alta gastronomia focada em frutos do mar sofisticados. O grande destaque do menu é o Camarão na Moranga.", 
     time: "Jantar", 
     icon: "fa-wine-glass", 
@@ -258,35 +345,35 @@
   { 
     id: "roda-maceio", 
     title: "Roda Gigante de Maceió", 
-    img: "https://images.unsplash.com/photo-1580974582391-a6021245eefd?auto=format&fit=crop&q=80&w=800", 
+    img: "https://cdnpm.dhost.cloud/imagens/IMG-20251106-WA0002.jpg?auto=format&fit=crop&q=80&w=800", 
     desc: "Nova atração turística da cidade, oferecendo uma vista panorâmica espetacular de toda a orla.", 
     time: "Tarde/Noite", 
     icon: "fa-circle-notch", 
     color: "from-pink-400 to-rose-600", 
-    lat: -9.6715, 
-    lng: -35.7120 
+    lat: -9.668093249053502, 
+    lng: -35.71311476433907
   },
   { 
     id: "sorveteria-bali", 
     title: "Sorveteria Bali", 
-    img: "https://images.unsplash.com/photo-1563805042-7684c8a9e9ce?auto=format&fit=crop&q=80&w=800", 
+    img: "https://www.janelasabertas.com/wp-content/uploads/2016/03/bali2.jpg?auto=format&fit=crop&q=80&w=800", 
     desc: "Experimente sorvetes regionais fantásticos. A grande estrela da casa é a famosa calda quente de Leite Ninho.", 
     time: "Tarde/Noite", 
     icon: "fa-ice-cream", 
     color: "from-teal-300 to-emerald-400", 
-    lat: -9.6655, 
-    lng: -35.7065 
+    lat: -9.669125233162706, 
+    lng: -35.71508848874085
   },
   { 
     id: "parmegiano", 
     title: "Parmegiano", 
-    img: "https://images.unsplash.com/photo-1604908177525-4c07da1ab728?auto=format&fit=crop&q=80&w=800", 
+    img: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0d/59/26/b0/20161010-181444-largejpg.jpg?auto=format&fit=crop&q=80&w=800", 
     desc: "Clássico restaurante famoso por sua comida farta e com excelente custo-benefício. Destaque para o Filé à Parmegiana.", 
     time: "Almoço/Jantar", 
     icon: "fa-plate-wheat", 
     color: "from-red-600 to-red-800", 
-    lat: -9.6648, 
-    lng: -35.7050 
+    lat: -9.661228283178177, 
+    lng: -35.705171389969884
   },
   { 
     id: "divina-gula", 
@@ -296,8 +383,8 @@
     time: "Jantar", 
     icon: "fa-fire-burner", 
     color: "from-orange-500 to-red-600", 
-    lat: -9.6580, 
-    lng: -35.7015 
+    lat: -9.646149591969554, 
+    lng: -35.70476554385244
   },
   { 
     id: "bodega-do-zito", 
@@ -307,8 +394,8 @@
     time: "Jantar", 
     icon: "fa-pizza-slice", 
     color: "from-yellow-600 to-amber-700", 
-    lat: -9.6450, 
-    lng: -35.7010 
+    lat: -9.657277149581901, 
+    lng: -35.71059149285891
   },
   { 
     id: "sal-e-brasa", 
@@ -318,8 +405,8 @@
     time: "Almoço", 
     icon: "fa-drumstick-bite", 
     color: "from-red-700 to-red-900", 
-    lat: -9.6380, 
-    lng: -35.6980 
+    lat: -9.63587765384739, 
+    lng: -35.69624693464834
   },
   { 
     id: "farol-ponta-verde", 
@@ -329,30 +416,30 @@
     time: "Manhã", 
     icon: "fa-lightbulb", 
     color: "from-slate-400 to-slate-600", 
-    lat: -9.6668, 
-    lng: -35.7018 
+    lat: -9.66577937301804, 
+    lng: -35.69222239971504
   },
   { 
     id: "pavilhao-artesanato", 
     title: "Pavilhão do Artesanato", 
-    img: "https://images.unsplash.com/photo-1605814568600-8d5427d14cb8?auto=format&fit=crop&q=80&w=800", 
+    img: "https://imgmd.net/images/v1/guia/1576070/pavilhao-do-artesanato.jpg?auto=format&fit=crop&q=80&w=800", 
     desc: "Uma grande galeria coberta com diversas lojas e boxes, ideal para encontrar cultura e lembranças de Alagoas.", 
     time: "Tarde/Noite", 
     icon: "fa-bag-shopping", 
     color: "from-purple-400 to-purple-600", 
-    lat: -9.6730, 
-    lng: -35.7155 
+    lat: -9.663443612213982, 
+    lng: -35.70807231568206 
   },
   { 
     id: "palato-praia", 
     title: "Palato Praia", 
-    img: "https://images.unsplash.com/photo-1588667822941-ab5880bc6f3e?auto=format&fit=crop&q=80&w=800", 
+    img: "https://static.wixstatic.com/media/411ad5_160afe03dc114985a107c58ca9bfdd6a~mv2.jpg/v1/fill/w_1000,h_752,al_c,q_85,usm_0.66_1.00_0.01/411ad5_160afe03dc114985a107c58ca9bfdd6a~mv2.jpg?auto=format&fit=crop&q=80&w=800", 
     desc: "Complexo gastronômico e supermercado premium aberto 24 horas, perfeito para uma refeição de luxo a qualquer hora.", 
     time: "Qualquer hora", 
     icon: "fa-basket-shopping", 
     color: "from-zinc-700 to-zinc-900", 
-    lat: -9.6620, 
-    lng: -35.7025 
+    lat: -9.663301948248453, 
+    lng: -35.70143278625965
   }
 ];
 
