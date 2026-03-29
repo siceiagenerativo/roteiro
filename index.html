@@ -167,36 +167,194 @@
 
         // Base de Dados
         const allSpots = [
-            { id: "ponta-verde", title: "Orla de Ponta Verde", img: "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&q=80&w=800", desc: "Caminhada pelo calçadão mais bonito do Brasil. Tire uma foto no letreiro 'Eu Amo Maceió'.", time: "Manhã", icon: "fa-sun", color: "from-amber-300 to-orange-400", lat: -9.6644, lng: -35.7051 },
-            { id: "piscinas-paju", title: "Piscinas Naturais de Pajuçara", img: "https://images.unsplash.com/photo-1582650517598-a616226db2ba?auto=format&fit=crop&q=80&w=800", desc: "Embarque numa jangada rústica até às famosas piscinas naturais para nadar com os peixinhos.", time: "Manhã/Tarde", icon: "fa-water", color: "from-ocean-light to-ocean", lat: -9.6740, lng: -35.7144 },
-            { id: "bodega-sertao", title: "Bodega do Sertão", img: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&q=80&w=800", desc: "Famoso restaurante com um bule gigante na fachada. Perfeito para o autêntico sabor nordestino.", time: "Almoço", icon: "fa-utensils", color: "from-amber-500 to-orange-600", lat: -9.6468, lng: -35.7005 },
-            { id: "feirinha", title: "Feirinha de Artesanato", img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=800", desc: "Compre lembranças locais e passeie por este tradicional mercado noturno na orla.", time: "Noite", icon: "fa-moon", color: "from-indigo-400 to-indigo-600", lat: -9.6720, lng: -35.7160 },
-            { id: "gunga", title: "Praia do Gunga & Falésias", img: "https://images.unsplash.com/photo-1596423736561-1c3902fcd2e6?auto=format&fit=crop&q=80&w=800", desc: "Uma das praias mais bonitas do Brasil. Inclui passeio de buggy nas falésias e banho de lagoa.", time: "Dia Inteiro", icon: "fa-route", color: "from-orange-400 to-red-500", lat: -9.8601, lng: -35.9037 },
-            { id: "massagueira", title: "Polo da Massagueira", img: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=800", desc: "Maior polo gastronómico ao ar livre do Nordeste, na beira da lagoa. Especialista em frutos do mar.", time: "Almoço", icon: "fa-fish", color: "from-cyan-500 to-blue-600", lat: -9.7121, lng: -35.8231 },
-            { id: "frances", title: "Praia do Francês", img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=800", desc: "Águas calmas protegidas por uma barreira de corais de um lado, e ondas para surf do outro.", time: "Manhã/Tarde", icon: "fa-umbrella-beach", color: "from-emerald-400 to-emerald-600", lat: -9.7667, lng: -35.8413 },
-            { id: "jantar-jatiuca", title: "Polo Gastronómico Jatiúca", img: "https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&q=80&w=800", desc: "Explore a alta gastronomia da cidade, provando pratos variados num ambiente vibrante.", time: "Jantar", icon: "fa-utensils", color: "from-rose-400 to-rose-600", lat: -9.6482, lng: -35.7001 },
-            { id: "lopana", title: "Lopana Beach Bar", img: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=800", desc: "O bar de praia mais famoso de Maceió. Ótima infraestrutura, música ao vivo e pratos deliciosos.", time: "Almoço", icon: "fa-umbrella-beach", color: "from-yellow-400 to-amber-500", lat: -9.6631, lng: -35.7042 },
-            { id: "ipioca", title: "Ipioca & Beach Club", img: "https://images.unsplash.com/photo-1499793983690-e29da00ef1c2?auto=format&fit=crop&q=80&w=800", desc: "Refúgio perfeito no Litoral Norte. Passe o dia a relaxar com conforto num Beach Club.", time: "Dia Inteiro", icon: "fa-cocktail", color: "from-teal-400 to-emerald-500", lat: -9.5186, lng: -35.5861 },
-            { id: "imperador", title: "Imperador dos Camarões", img: "https://images.unsplash.com/photo-1600891964092-4316c288032e?auto=format&fit=crop&q=80&w=800", desc: "Casa do famoso prato 'Chiclete de Camarão'. Uma experiência gastronómica imperdível.", time: "Jantar", icon: "fa-shrimp", color: "from-rose-500 to-red-600", lat: -9.6731, lng: -35.7132 },
-            { id: "centro-hist", title: "Bairro Histórico de Jaraguá", img: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&q=80&w=800", desc: "Aprecie a arquitetura dos antigos armazéns, casarões e museus no berço histórico de Maceió.", time: "Manhã", icon: "fa-landmark", color: "from-purple-400 to-purple-600", lat: -9.6711, lng: -35.7262 },
-            { id: "lagoa", title: "Passeio das 9 Ilhas", img: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&q=80&w=800", desc: "Navegue pela Lagoa Mundaú no fim de tarde e desfrute de um pôr do sol inesquecível na água.", time: "Fim de Tarde", icon: "fa-ship", color: "from-blue-400 to-indigo-500", lat: -9.6953, lng: -35.7601 },
-            { id: "divina-gula", title: "Divina Gula", img: "https://images.unsplash.com/photo-1627054234551-cefa6d86411d?auto=format&fit=crop&q=80&w=800", desc: "Restaurante premiado que mistura a culinária mineira com ingredientes alagoanos.", time: "Jantar", icon: "fa-star", color: "from-orange-400 to-orange-600", lat: -9.6451, lng: -35.7012 },
-            { id: "milagres", title: "São Miguel dos Milagres", img: "https://images.unsplash.com/photo-1590418606746-018840f9cb25?auto=format&fit=crop&q=80&w=800", desc: "Bate-volta para a Rota Ecológica. Piscinas naturais quase desertas e coqueirais.", time: "Dia Inteiro", icon: "fa-camera", color: "from-cyan-400 to-blue-500", lat: -9.2676, lng: -35.3725 },
-            { id: "parmegianno", title: "Restaurante Parmegianno", img: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=800", desc: "Um clássico da cidade, famoso por pratos muito bem servidos. Ótimo para repor as energias.", time: "Almoço", icon: "fa-utensils", color: "from-red-400 to-red-600", lat: -9.6651, lng: -35.7032 },
-            { id: "paripueira", title: "Piscinas de Paripueira", img: "https://images.unsplash.com/photo-1538331269258-6c97a6bde206?auto=format&fit=crop&q=80&w=800", desc: "Extensas piscinas naturais com águas mornas, ideais para observar a vida marinha.", time: "Manhã/Tarde", icon: "fa-fish", color: "from-sky-400 to-sky-600", lat: -9.4589, lng: -35.5398 },
-            { id: "maria-antonieta", title: "Maria Antonieta", img: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=800", desc: "Restaurante italiano com uma belíssima árvore de ferro iluminada no centro do salão.", time: "Jantar", icon: "fa-wine-glass-alt", color: "from-purple-500 to-purple-700", lat: -9.6441, lng: -35.7022 },
-            { id: "mirante", title: "Mirante de São Gonçalo", img: "https://images.unsplash.com/photo-1506462945848-ac8ea6f609dc?auto=format&fit=crop&q=80&w=800", desc: "Uma vista panorâmica maravilhosa da cidade, do porto de Maceió e de toda a orla.", time: "Fim de Tarde", icon: "fa-binoculars", color: "from-stone-400 to-stone-600", lat: -9.6586, lng: -35.7351 },
-            { id: "tabuba", title: "Praia de Tabuba", img: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?auto=format&fit=crop&q=80&w=800", desc: "Praia de águas mansas e mornas, perfeita para banho e encontro do rio com o mar.", time: "Manhã/Tarde", icon: "fa-umbrella-beach", color: "from-cyan-400 to-cyan-600", lat: -9.4975, lng: -35.5683 },
-            { id: "carro-quebrado", title: "Praia de Carro Quebrado", img: "https://images.unsplash.com/photo-1624314138470-5a2f24623f10?auto=format&fit=crop&q=80&w=800", desc: "Famosa pelas altas falésias de areia colorida e natureza praticamente selvagem.", time: "Dia Inteiro", icon: "fa-car", color: "from-orange-500 to-red-500", lat: -9.3636, lng: -35.4542 },
-            { id: "parque-municipal", title: "Parque Municipal de Maceió", img: "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&q=80&w=800", desc: "Reserva de Mata Atlântica dentro da cidade, ideal para trilhas ecológicas e piqueniques.", time: "Manhã", icon: "fa-tree", color: "from-green-500 to-green-700", lat: -9.6200, lng: -35.7533 },
-            { id: "museu-theo", title: "Museu Théo Brandão", img: "https://images.unsplash.com/photo-1518998053401-878ae37c2646?auto=format&fit=crop&q=80&w=800", desc: "Acervo riquíssimo de arte popular e cultura alagoana num imponente casarão histórico.", time: "Tarde", icon: "fa-museum", color: "from-stone-500 to-stone-700", lat: -9.6685, lng: -35.7330 },
-            { id: "catedral", title: "Catedral Metropolitana", img: "https://images.unsplash.com/photo-1548625361-ecce18835845?auto=format&fit=crop&q=80&w=800", desc: "Bela arquitetura neoclássica no centro de Maceió, um marco histórico e religioso.", time: "Manhã", icon: "fa-church", color: "from-purple-300 to-purple-500", lat: -9.6648, lng: -35.7355 },
-            { id: "guaxuma", title: "Praia de Guaxuma", img: "https://images.unsplash.com/photo-1505881502353-a1986add3762?auto=format&fit=crop&q=80&w=800", desc: "Praia com quiosques muito bem estruturados, mar um pouco mais agitado e rodeada de coqueiros.", time: "Manhã/Tarde", icon: "fa-water", color: "from-blue-300 to-blue-500", lat: -9.5833, lng: -35.6667 },
-            { id: "sonho-verde", title: "Praia de Sonho Verde", img: "https://images.unsplash.com/photo-1520483601560-389dff434fdf?auto=format&fit=crop&q=80&w=800", desc: "Tranquilidade absoluta e mar muito manso formam o cenário perfeito para relaxar em família.", time: "Dia Inteiro", icon: "fa-leaf", color: "from-emerald-300 to-emerald-500", lat: -9.4333, lng: -35.5167 },
-            { id: "mercado-producao", title: "Mercado da Produção", img: "https://images.unsplash.com/photo-1533900298318-6b8da08a523e?auto=format&fit=crop&q=80&w=800", desc: "O lugar certo para conhecer a cultura local a fundo e comprar produtos regionais autênticos.", time: "Manhã", icon: "fa-shopping-basket", color: "from-yellow-500 to-yellow-700", lat: -9.6600, lng: -35.7400 },
-            { id: "jangada-ponta", title: "Jangada na Ponta Verde", img: "https://images.unsplash.com/photo-1534008897995-27a23e859048?auto=format&fit=crop&q=80&w=800", desc: "Passeio relaxante até o farol da Ponta Verde durante a maré baixa para fotos incríveis.", time: "Manhã", icon: "fa-sailboat", color: "from-sky-300 to-sky-500", lat: -9.6644, lng: -35.7051 },
-            { id: "santuario-tereza", title: "Santuário Santa Tereza", img: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=800", desc: "Piscina natural de águas cristalinas rodeada de uma deslumbrante e silenciosa mata preservada.", time: "Dia Inteiro", icon: "fa-dove", color: "from-teal-500 to-teal-700", lat: -9.3100, lng: -35.4100 }
-        ];
+  { 
+    id: "cadeira-gigante", 
+    title: "Cadeira Gigante", 
+    img: "https://images.unsplash.com/photo-1533157579120-21f4568e64c1?auto=format&fit=crop&q=80&w=800", 
+    desc: "Chegue cedo (antes das 07:00) para evitar filas e tirar fotos divertidas neste ponto instagramável da orla.", 
+    time: "Manhã", 
+    icon: "fa-camera", 
+    color: "from-blue-400 to-blue-600", 
+    lat: -9.6631, 
+    lng: -35.7032 
+  },
+  { 
+    id: "bodega-sertao", 
+    title: "Bodega do Sertão", 
+    img: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&q=80&w=800", 
+    desc: "Comida sertaneja raiz servida em buffet. Famoso por sua decoração marcante com um bule gigante na fachada.", 
+    time: "Almoço", 
+    icon: "fa-utensils", 
+    color: "from-amber-500 to-orange-600", 
+    lat: -9.6468, 
+    lng: -35.7005 
+  },
+  { 
+    id: "marco-dos-corais", 
+    title: "Marco dos Corais", 
+    img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=800", 
+    desc: "A melhor vista para curtir o pôr do sol e tirar fotos deslumbrantes do mar de Maceió.", 
+    time: "Fim de Tarde", 
+    icon: "fa-sun", 
+    color: "from-orange-400 to-red-500", 
+    lat: -9.6640, 
+    lng: -35.7045 
+  },
+  { 
+    id: "imperador-camaroes", 
+    title: "Imperador dos Camarões", 
+    img: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=800", 
+    desc: "Referência na gastronomia local, o restaurante é o criador do famoso e autêntico Chiclete de Camarão.", 
+    time: "Almoço/Jantar", 
+    icon: "fa-shrimp", 
+    color: "from-red-400 to-red-600", 
+    lat: -9.6685, 
+    lng: -35.7112 
+  },
+  { 
+    id: "piscinas-paju", 
+    title: "Piscinas Naturais de Pajuçara", 
+    img: "https://images.unsplash.com/photo-1582650517598-a616226db2ba?auto=format&fit=crop&q=80&w=800", 
+    desc: "Passeio de jangada imperdível. Dica: sempre consulte a tábua de maré (o ideal é estar abaixo de 0.5).", 
+    time: "Manhã", 
+    icon: "fa-water", 
+    color: "from-ocean-light to-ocean", 
+    lat: -9.6740, 
+    lng: -35.7144 
+  },
+  { 
+    id: "lopana", 
+    title: "Lopana", 
+    img: "https://images.unsplash.com/photo-1545044846-351ba102b6d5?auto=format&fit=crop&q=80&w=800", 
+    desc: "A barraca de praia mais famosa e premium da orla. Oferece ótimos petiscos, drinks e ambiente animado com DJ.", 
+    time: "Dia Todo", 
+    icon: "fa-umbrella-beach", 
+    color: "from-yellow-300 to-orange-400", 
+    lat: -9.6662, 
+    lng: -35.7075 
+  },
+  { 
+    id: "feirinha-pajucara", 
+    title: "Feirinha de Artesanato", 
+    img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=800", 
+    desc: "O melhor local na praia de Pajuçara para comprar artesanatos regionais e lembrancinhas.", 
+    time: "Noite", 
+    icon: "fa-store", 
+    color: "from-indigo-400 to-indigo-600", 
+    lat: -9.6720, 
+    lng: -35.7160 
+  },
+  { 
+    id: "janga", 
+    title: "Janga", 
+    img: "https://images.unsplash.com/photo-1559742811-822873691fc8?auto=format&fit=crop&q=80&w=800", 
+    desc: "Alta gastronomia focada em frutos do mar sofisticados. O grande destaque do menu é o Camarão na Moranga.", 
+    time: "Jantar", 
+    icon: "fa-wine-glass", 
+    color: "from-stone-600 to-stone-800", 
+    lat: -9.6610, 
+    lng: -35.7011 
+  },
+  { 
+    id: "roda-maceio", 
+    title: "Roda Gigante de Maceió", 
+    img: "https://images.unsplash.com/photo-1580974582391-a6021245eefd?auto=format&fit=crop&q=80&w=800", 
+    desc: "Nova atração turística da cidade, oferecendo uma vista panorâmica espetacular de toda a orla.", 
+    time: "Tarde/Noite", 
+    icon: "fa-circle-notch", 
+    color: "from-pink-400 to-rose-600", 
+    lat: -9.6715, 
+    lng: -35.7120 
+  },
+  { 
+    id: "sorveteria-bali", 
+    title: "Sorveteria Bali", 
+    img: "https://images.unsplash.com/photo-1563805042-7684c8a9e9ce?auto=format&fit=crop&q=80&w=800", 
+    desc: "Experimente sorvetes regionais fantásticos. A grande estrela da casa é a famosa calda quente de Leite Ninho.", 
+    time: "Tarde/Noite", 
+    icon: "fa-ice-cream", 
+    color: "from-teal-300 to-emerald-400", 
+    lat: -9.6655, 
+    lng: -35.7065 
+  },
+  { 
+    id: "parmegiano", 
+    title: "Parmegiano", 
+    img: "https://images.unsplash.com/photo-1604908177525-4c07da1ab728?auto=format&fit=crop&q=80&w=800", 
+    desc: "Clássico restaurante famoso por sua comida farta e com excelente custo-benefício. Destaque para o Filé à Parmegiana.", 
+    time: "Almoço/Jantar", 
+    icon: "fa-plate-wheat", 
+    color: "from-red-600 to-red-800", 
+    lat: -9.6648, 
+    lng: -35.7050 
+  },
+  { 
+    id: "divina-gula", 
+    title: "Divina Gula", 
+    img: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&q=80&w=800", 
+    desc: "Perfeita fusão da culinária de Minas Gerais e Alagoas. Peça o Cupim e o irresistível Pão de Alho caseiro.", 
+    time: "Jantar", 
+    icon: "fa-fire-burner", 
+    color: "from-orange-500 to-red-600", 
+    lat: -9.6580, 
+    lng: -35.7015 
+  },
+  { 
+    id: "bodega-do-zito", 
+    title: "Bodega do Zito", 
+    img: "https://images.unsplash.com/photo-1590947132387-155cc02f3212?auto=format&fit=crop&q=80&w=800", 
+    desc: "Ambiente rústico e acolhedor servindo pizzas excelentes e pratos regionais nordestinos.", 
+    time: "Jantar", 
+    icon: "fa-pizza-slice", 
+    color: "from-yellow-600 to-amber-700", 
+    lat: -9.6450, 
+    lng: -35.7010 
+  },
+  { 
+    id: "sal-e-brasa", 
+    title: "Sal e Brasa", 
+    img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=800", 
+    desc: "Churrascaria renomada que além do tradicional rodízio de carnes, oferece um completo buffet de frutos do mar.", 
+    time: "Almoço", 
+    icon: "fa-drumstick-bite", 
+    color: "from-red-700 to-red-900", 
+    lat: -9.6380, 
+    lng: -35.6980 
+  },
+  { 
+    id: "farol-ponta-verde", 
+    title: "Farol da Ponta Verde", 
+    img: "https://images.unsplash.com/photo-1506501139174-099022df5260?auto=format&fit=crop&q=80&w=800", 
+    desc: "Símbolo icônico da cidade, localizado nas pedras da Ponta Verde. Rende fotos maravilhosas na maré baixa.", 
+    time: "Manhã", 
+    icon: "fa-lightbulb", 
+    color: "from-slate-400 to-slate-600", 
+    lat: -9.6668, 
+    lng: -35.7018 
+  },
+  { 
+    id: "pavilhao-artesanato", 
+    title: "Pavilhão do Artesanato", 
+    img: "https://images.unsplash.com/photo-1605814568600-8d5427d14cb8?auto=format&fit=crop&q=80&w=800", 
+    desc: "Uma grande galeria coberta com diversas lojas e boxes, ideal para encontrar cultura e lembranças de Alagoas.", 
+    time: "Tarde/Noite", 
+    icon: "fa-bag-shopping", 
+    color: "from-purple-400 to-purple-600", 
+    lat: -9.6730, 
+    lng: -35.7155 
+  },
+  { 
+    id: "palato-praia", 
+    title: "Palato Praia", 
+    img: "https://images.unsplash.com/photo-1588667822941-ab5880bc6f3e?auto=format&fit=crop&q=80&w=800", 
+    desc: "Complexo gastronômico e supermercado premium aberto 24 horas, perfeito para uma refeição de luxo a qualquer hora.", 
+    time: "Qualquer hora", 
+    icon: "fa-basket-shopping", 
+    color: "from-zinc-700 to-zinc-900", 
+    lat: -9.6620, 
+    lng: -35.7025 
+  }
+];
 
         // Lógica de Ordenação
         const getWeight = (time) => {
@@ -339,35 +497,6 @@
                 setActiveTab('catalogo');
             };
 
-            // Sortear Aleatório
-            const generateRandomItinerary = () => {
-                const isLunch = (s) => s.time === 'Almoço';
-                const isDinner = (s) => s.time === 'Jantar';
-                const isActivity = (s) => !isLunch(s) && !isDinner(s);
-
-                let allLunchSpots = allSpots.filter(isLunch);
-                let allDinnerSpots = allSpots.filter(isDinner);
-                
-                let activitySpots = [...allSpots.filter(isActivity)].sort(() => Math.random() - 0.5); // Shuffle
-                
-                let newItinerary = {};
-                activeDays.forEach(day => {
-                    newItinerary[day] = [];
-                    const act = activitySpots.pop();
-                    const lun = allLunchSpots[Math.floor(Math.random() * allLunchSpots.length)];
-                    const din = allDinnerSpots[Math.floor(Math.random() * allDinnerSpots.length)];
-                    
-                    let dayItems = [act, lun, din].filter(Boolean);
-                    dayItems.sort((a, b) => getWeight(a.time) - getWeight(b.time));
-                    newItinerary[day].push(...dayItems);
-                });
-
-                setItinerary(newItinerary);
-                setActiveTab('dia1');
-                showToastMessage('Roteiro mágico gerado com sucesso!');
-                document.getElementById('planeador').scrollIntoView({ behavior: 'smooth' });
-            };
-
             // --- Lógica do PWA ---
             useEffect(() => {
                 const handler = (e) => {
@@ -470,9 +599,6 @@
                                                 if (!isEmpty) setClearModalOpen(true);
                                             }} className="flex-1 lg:flex-none inline-flex justify-center items-center gap-2 bg-white text-red-500 border border-red-100 font-medium py-2.5 md:py-3 px-6 rounded-full hover:bg-red-50 hover:border-red-200 transition-all duration-300 shadow-sm transform hover:-translate-y-1 text-sm md:text-base">
                                                 <i className="fas fa-trash-alt"></i> Limpar Tudo
-                                            </button>
-                                            <button onClick={generateRandomItinerary} className="flex-1 lg:flex-none inline-flex justify-center items-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold py-2.5 md:py-3 px-6 rounded-full hover:from-purple-400 hover:to-indigo-500 transition-all duration-300 shadow-[0_8px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_12px_20px_rgba(99,102,241,0.4)] transform hover:-translate-y-1 text-sm md:text-base">
-                                                <i className="fas fa-magic"></i> Estou com Sorte!
                                             </button>
                                         </div>
                                     </div>
